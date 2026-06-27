@@ -1,21 +1,13 @@
 # ============================================================
-#  tracker.py — Envío periódico de posición al servidor
-#  Construye el JSON y ejecuta el HTTP POST via sim_module
+#  tracker.py — Envío periódico de posición GPS
+#  POST al servidor principal y al monitor de estado
 # ============================================================
+
+from config import MONITOR_URL
 
 
 def build_json(gps: dict, imei: str) -> str:
-    """
-    Construye el payload JSON para el endpoint de tracking.
-
-    Campos enviados:
-        latitude    float  7 decimales
-        longitude   float  7 decimales
-        date        str    YYYY-MM-DD HH:MM:SS
-        imei        str    15 dígitos
-        accuracy_m  int    precisión estimada en metros
-        speed       float  km/h
-    """
+    """Construye el payload JSON para el endpoint de tracking principal."""
     lat  = gps.get("latitude",   0.0)
     lon  = gps.get("longitude",  0.0)
     date = gps.get("timedate",   "")
@@ -23,20 +15,53 @@ def build_json(gps: dict, imei: str) -> str:
     spd  = gps.get("speed",      0.0)
 
     return (
-        '{"latitude":' + "{:.7f}".format(lat) +
+        '{"latitude":'  + "{:.7f}".format(lat) +
         ',"longitude":' + "{:.7f}".format(lon) +
-        ',"date":"' + date + '"' +
-        ',"imei":"' + imei + '"' +
+        ',"date":"'     + date + '"' +
+        ',"imei":"'     + imei + '"' +
         ',"accuracy_m":' + str(acc) +
-        ',"speed":' + "{:.2f}".format(spd) +
+        ',"speed":'     + "{:.2f}".format(spd) +
+        '}'
+    )
+
+
+def _build_monitor_json(gps: dict, sim) -> str:
+    """
+    Payload para el monitor de Railway.
+    Incluye GPS + señal celular + temperatura.
+    """
+    imei = sim.get_imei()
+    lat  = gps.get("latitude",  0.0)
+    lon  = gps.get("longitude", 0.0)
+    acc  = gps.get("accuracy_m", 999)
+    spd  = gps.get("speed", 0.0)
+
+    try:
+        sig    = sim.check_signal()
+        rssi   = sig.get("rssi", 0)
+        signal = sig.get("label", "")
+        temp   = sim.get_temperature()
+    except Exception:
+        rssi, signal, temp = 0, "", "0"
+
+    return (
+        '{"imei":"'   + imei + '"' +
+        ',"event":"HEARTBEAT"' +
+        ',"message":"GPS activo"' +
+        ',"lat":'     + "{:.6f}".format(lat) +
+        ',"lon":'     + "{:.6f}".format(lon) +
+        ',"rssi":'    + str(rssi) +
+        ',"temp":'    + str(temp) +
+        ',"signal":"' + signal + '"' +
+        ',"extra":"acc:{}m spd:{:.1f}km/h"'.format(acc, spd) +
         '}'
     )
 
 
 def send_position(sim, gps: dict):
     """
-    Valida el fix GPS y envía la posición al servidor.
-    No hace nada si las coordenadas son 0,0.
+    Envía posición al servidor principal (latecorazon.com) y
+    al monitor de estado (Railway) en cada ciclo con GPS válido.
     """
     lat = gps.get("latitude",  0.0)
     lon = gps.get("longitude", 0.0)
@@ -45,11 +70,18 @@ def send_position(sim, gps: dict):
         print("GPS invalido, no se envia HTTP")
         return
 
-    imei     = sim.get_imei()
-    payload  = build_json(gps, imei)
+    imei    = sim.get_imei()
+    payload = build_json(gps, imei)
 
-    print("--- JSON enviado ---")
+    print("--- GPS ---")
     print(payload)
-    print("-------------------")
+    print("----------")
 
+    # 1. Servidor principal
     sim.http_post(payload)
+
+    # 2. Monitor de estado
+    try:
+        sim.http_post(_build_monitor_json(gps, sim), url=MONITOR_URL)
+    except Exception as e:
+        print("monitor error:", e)

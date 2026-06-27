@@ -545,6 +545,9 @@ class SIMModule:
         self._feed()
         self.send_at("AT+HTTPTERM",  timeout_ms=500)
         self._feed()
+        # Deshabilitar verificacion SSL — necesario para certificados de Render/onrender.com
+        self.send_at("AT+HTTPSSL=1", timeout_ms=500)
+        self._feed()
         self.send_at("AT+HTTPINIT",  timeout_ms=2000)
         self._feed()
         self.send_at('AT+HTTPPARA="CID",1',              timeout_ms=500)

@@ -1,11 +1,9 @@
 # ============================================================
-#  heartbeat.py — Reporte de estado remoto DEA-001
-#  Envía eventos al servidor de monitoreo via HTTP POST
+#  heartbeat.py — Reporte de eventos al servidor de monitoreo
+#  Envía estado del dispositivo via HTTP POST a Railway
 # ============================================================
 
-# URL del servidor de monitoreo
-# Reemplaza con la URL de tu app en Railway una vez deployada
-MONITOR_URL = "https://TU-APP.railway.app/api/heartbeat"
+from config import MONITOR_URL
 
 
 def send_heartbeat(sim, event: str, message: str = "",
@@ -14,12 +12,12 @@ def send_heartbeat(sim, event: str, message: str = "",
     """
     Envía un evento de estado al servidor de monitoreo.
 
-    Parámetros:
+    Args:
         sim     : instancia SIMModule
-        event   : BOOT, GPS_TIMEOUT, ERROR, HEARTBEAT, EMERGENCY, etc.
-        message : descripción opcional del evento
+        event   : tipo — BOOT, HEARTBEAT, EMERGENCY, GPS_TIMEOUT, etc.
+        message : descripción opcional
         lat/lon : coordenadas si están disponibles
-        extra   : información adicional (número marcado, código de error, etc.)
+        extra   : dato adicional (número marcado, código de error, etc.)
     """
     try:
         sig    = sim.check_signal()

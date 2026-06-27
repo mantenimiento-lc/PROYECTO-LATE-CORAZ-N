@@ -6,9 +6,11 @@
 import time
 import machine
 
-from config      import CALL_NUMBERS, SMS_NUMBERS, HTTP_INTERVAL_MS, RESET_INTERVAL_MS, CALL_RETRY_MS, CONFIRM_TIMEOUT_MS
+from config      import (CALL_NUMBERS, SMS_NUMBERS,
+                         HTTP_INTERVAL_MS, HEARTBEAT_INTERVAL_MS,
+                         RESET_INTERVAL_MS, CALL_RETRY_MS, CONFIRM_TIMEOUT_MS)
 from sim_module  import SIMModule
-from emergency   import build_sms, handle_hangup
+from emergency   import build_sms
 from tracker     import send_position
 from heartbeat   import send_heartbeat
 from call_log    import log_event
@@ -31,7 +33,7 @@ last_call_time      = 0           # cuando fue la ultima llamada
 confirm_start       = 0           # cuando inicio el retardo de confirmacion
 last_valid_gps_time = time.ticks_ms()
 last_http_time      = time.ticks_ms() - HTTP_INTERVAL_MS
-last_heartbeat_time = time.ticks_ms() - 60_000   # primer heartbeat inmediato
+last_heartbeat_time = time.ticks_ms() - HEARTBEAT_INTERVAL_MS  # primer heartbeat inmediato
 last_gps            = {"latitude": 0.0, "longitude": 0.0,
                        "accuracy_m": 999, "timedate": "", "valid": False}
 
@@ -80,6 +82,7 @@ def loop():
             print("Iman devuelto — alerta cancelada (traslado rutinario)")
             ts = last_gps.get("timedate", "") or sim.get_rtc()
             log_event("CANCELLED", ts, 0.0, 0.0)
+            send_heartbeat(sim, "CANCELLED", "Iman devuelto — traslado rutinario")
             state = IDLE
             return
 
@@ -88,6 +91,7 @@ def loop():
             print("Boton presionado — alerta cancelada por operador")
             ts = last_gps.get("timedate", "") or sim.get_rtc()
             log_event("CANCELLED", ts, 0.0, 0.0)
+            send_heartbeat(sim, "CANCELLED", "Cancelado por operador — boton presionado")
             state = IDLE
             return
 
@@ -143,6 +147,10 @@ def loop():
             log_event("SMS_SENT", rtcs,
                       last_gps.get("latitude", 0.0),
                       last_gps.get("longitude", 0.0))
+            send_heartbeat(sim, "SMS_SENT",
+                           "SMS enviado a {} numeros".format(len(numeros_unicos)),
+                           lat=last_gps.get("latitude", 0.0),
+                           lon=last_gps.get("longitude", 0.0))
 
         # 2. Llamar al siguiente numero de la lista en loop
         now = time.ticks_ms()
@@ -155,6 +163,11 @@ def loop():
                       last_gps.get("latitude", 0.0),
                       last_gps.get("longitude", 0.0),
                       extra=number)
+            send_heartbeat(sim, "CALL",
+                           "Llamando a {}".format(number),
+                           lat=last_gps.get("latitude", 0.0),
+                           lon=last_gps.get("longitude", 0.0),
+                           extra=number)
             last_call_time = time.ticks_ms()
             call_index += 1
 
@@ -168,6 +181,7 @@ def loop():
                     state = ANSWERED
                     ts = last_gps.get("timedate", "") or sim.get_rtc()
                     log_event("ANSWERED", ts, 0.0, 0.0)
+                    send_heartbeat(sim, "ANSWERED", "Llamada de emergencia contestada")
                 elif "NO CARRIER" in s or "BUSY" in s or "NO ANSWER" in s:
                     # Nadie contesto — seguir con el siguiente numero
                     print("Sin respuesta, siguiente numero...")
@@ -191,8 +205,8 @@ def loop():
         last_http_time = time.ticks_ms()
         send_position(sim, last_gps)
 
-    # ── Heartbeat periodico al servidor de monitoreo (cada 60 seg) ──
-    if time.ticks_diff(time.ticks_ms(), last_heartbeat_time) >= 60_000:
+    # ── Heartbeat periodico al servidor de monitoreo ──
+    if time.ticks_diff(time.ticks_ms(), last_heartbeat_time) >= HEARTBEAT_INTERVAL_MS:
         last_heartbeat_time = time.ticks_ms()
         send_heartbeat(sim, "HEARTBEAT",
                        lat=last_gps.get("latitude",  0.0),
