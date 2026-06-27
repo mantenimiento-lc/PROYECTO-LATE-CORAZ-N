@@ -132,6 +132,7 @@
           <option value="ANSWERED">✅ ANSWERED</option>
           <option value="CANCELLED">✋ CANCELLED</option>
           <option value="HEARTBEAT">💓 HEARTBEAT</option>
+          <option value="TRACKING">📍 TRACKING — GPS activo</option>
         </select>
       </div>
     </div>
@@ -402,12 +403,17 @@
     const imei     = document.getElementById("edit-imei").value;
     const name     = document.getElementById("edit-name").value;
     const location = document.getElementById("edit-location").value;
-    await fetch(`/api/devices/${imei}`, {
-      method:"PUT", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({name, location}),
-    });
-    closeModal();
-    loadDevices();
+    try {
+      const res = await fetch(`/api/devices/${imei}`, {
+        method:"PUT", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({name, location}),
+      });
+      if (!res.ok) throw new Error("Error " + res.status);
+      closeModal();
+      loadDevices();
+    } catch(e) {
+      alert("No se pudo guardar: " + e.message);
+    }
   }
 
   loadAll();
