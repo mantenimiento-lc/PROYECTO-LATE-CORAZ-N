@@ -156,13 +156,89 @@ def log_position(imei: str, lat: float, lon: float,
     conn.close()
 
 
-def get_all_devices() -> list:
+def upsert_heartbeat(imei: str, data: dict):
+    """
+    Crea o actualiza el ÚNICO registro de heartbeat por dispositivo.
+    Así no se acumula spam de heartbeats en la tabla events.
+    """
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id FROM events WHERE imei=? AND event_type='HEARTBEAT'", (imei,))
+    row = c.fetchone()
+    ts = now_utc()
+    msg = data.get("message", "")
+    lat = data.get("lat", 0.0)
+    lon = data.get("lon", 0.0)
+    rssi = data.get("rssi", 0)
+    temp = data.get("temp", 0.0)
+    if row:
+        c.execute("""
+            UPDATE events SET message=?, lat=?, lon=?, rssi=?, temp=?, created_at=?
+            WHERE id=?
+        """, (msg, lat, lon, rssi, temp, ts, row["id"]))
+    else:
+        c.execute("""
+            INSERT INTO events (imei, event_type, message, lat, lon, rssi, temp, extra, created_at)
+            VALUES (?, 'HEARTBEAT', ?, ?, ?, ?, ?, '', ?)
+        """, (imei, msg, lat, lon, rssi, temp, ts))
+    conn.commit()
+    conn.close()
+
+
+def upsert_gps_alert(imei: str):
+    """
+    Crea o actualiza el ÚNICO registro de GPS_TIMEOUT por dispositivo.
+    """
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id FROM events WHERE imei=? AND event_type='GPS_TIMEOUT'", (imei,))
+    row = c.fetchone()
+    ts = now_utc()
+    if row:
+        c.execute("UPDATE events SET created_at=? WHERE id=?", (ts, row["id"]))
+    else:
+        c.execute("""
+            INSERT INTO events (imei, event_type, message, lat, lon, rssi, temp, extra, created_at)
+            VALUES (?, 'GPS_TIMEOUT', 'Sin fix GPS', 0.0, 0.0, 0, 0.0, '', ?)
+        """, (imei, ts))
+    conn.commit()
+    conn.close()
+
+
+
     conn = get_conn()
     c = conn.cursor()
     c.execute("SELECT * FROM devices ORDER BY last_seen DESC")
     rows = [dict(r) for r in c.fetchall()]
     conn.close()
     return rows
+
+
+def upsert_tracking_event(imei: str, lat: float, lon: float,
+                          accuracy_m: int = 999, speed: float = 0.0):
+    """
+    Crea o actualiza el ÚNICO evento de tracking por dispositivo.
+    Muestra la última posición GPS recibida.
+    """
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT id FROM events WHERE imei=? AND event_type='TRACKING'", (imei,))
+    row = c.fetchone()
+    ts  = now_utc()
+    msg = "Lat:{:.6f} Lon:{:.6f} | Precision:{}m | Vel:{:.1f}km/h".format(
+          lat, lon, accuracy_m, speed)
+    if row:
+        c.execute("""
+            UPDATE events SET message=?, lat=?, lon=?, created_at=?
+            WHERE id=?
+        """, (msg, lat, lon, ts, row["id"]))
+    else:
+        c.execute("""
+            INSERT INTO events (imei, event_type, message, lat, lon, rssi, temp, extra, created_at)
+            VALUES (?, 'TRACKING', ?, ?, ?, 0, 0.0, '', ?)
+        """, (imei, msg, lat, lon, ts))
+    conn.commit()
+    conn.close()
 
 
 def get_events(imei: str = None, limit: int = 100) -> list:

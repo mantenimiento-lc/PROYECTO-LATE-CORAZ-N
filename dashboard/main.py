@@ -119,6 +119,9 @@ async def tracking(payload: TrackingPayload):
         accuracy_m = payload.accuracy_m or 999,
         speed      = payload.speed or 0.0,
     )
+    # Registrar evento de tracking (uno solo que se actualiza)
+    db.upsert_tracking_event(payload.imei, payload.latitude, payload.longitude,
+                             payload.accuracy_m or 999, payload.speed or 0.0)
 
     return {"status": "ok"}
 
@@ -139,7 +142,7 @@ async def get_devices():
                 last = last.replace(tzinfo=timezone.utc)
                 diff = (now - last).total_seconds()
                 has_gps = not (d.get("last_lat", 0.0) == 0.0 and d.get("last_lon", 0.0) == 0.0)
-                d["online"] = diff < 300 and has_gps
+                d["online"] = diff < 600 and has_gps  # 10 minutos
                 d["minutes_ago"] = int(diff / 60)
             except Exception:
                 d["online"] = False
