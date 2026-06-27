@@ -70,16 +70,27 @@ async def heartbeat(payload: HeartbeatPayload):
     }
 
     db.upsert_device(payload.imei, data)
-    db.log_event(
-        imei       = payload.imei,
-        event_type = payload.event,
-        message    = payload.message or "",
-        lat        = payload.lat,
-        lon        = payload.lon,
-        rssi       = payload.rssi,
-        temp       = payload.temp,
-        extra      = payload.extra or "",
-    )
+
+    # HEARTBEAT: un solo registro que se actualiza
+    if payload.event == "HEARTBEAT":
+        db.upsert_heartbeat(payload.imei, {
+            "message": payload.message or "",
+            "lat": payload.lat, "lon": payload.lon,
+            "rssi": payload.rssi, "temp": payload.temp,
+        })
+    elif payload.event == "GPS_TIMEOUT":
+        db.upsert_gps_alert(payload.imei)
+    else:
+        db.log_event(
+            imei       = payload.imei,
+            event_type = payload.event,
+            message    = payload.message or "",
+            lat        = payload.lat,
+            lon        = payload.lon,
+            rssi       = payload.rssi,
+            temp       = payload.temp,
+            extra      = payload.extra or "",
+        )
 
     return {"status": "ok"}
 
@@ -121,13 +132,14 @@ async def get_devices():
     now = datetime.now(timezone.utc)
 
     for d in devices:
-        # Calcular si está online (último reporte < 5 minutos)
+        # En línea = último reporte < 5 minutos Y tiene GPS válido
         if d.get("last_seen"):
             try:
                 last = datetime.strptime(d["last_seen"], "%Y-%m-%d %H:%M:%S")
                 last = last.replace(tzinfo=timezone.utc)
                 diff = (now - last).total_seconds()
-                d["online"] = diff < 300   # 5 minutos
+                has_gps = not (d.get("last_lat", 0.0) == 0.0 and d.get("last_lon", 0.0) == 0.0)
+                d["online"] = diff < 300 and has_gps
                 d["minutes_ago"] = int(diff / 60)
             except Exception:
                 d["online"] = False
