@@ -128,6 +128,19 @@ async def tracking(payload: TrackingPayload):
 
 # ── Endpoints del dashboard ───────────────────────────────────
 
+@app.get("/api/emergencies")
+async def get_emergencies(imei: Optional[str] = None, limit: int = 200):
+    """Retorna todas las emergencias registradas, opcionalmente por dispositivo."""
+    events = db.get_emergencies(imei=imei, limit=limit)
+    # Enriquecer con nombre del dispositivo
+    devices = {d["imei"]: d for d in db.get_all_devices()}
+    for e in events:
+        dev = devices.get(e["imei"], {})
+        e["device_name"]     = dev.get("name", "") or ""
+        e["device_location"] = dev.get("location", "") or ""
+    return JSONResponse(content=events)
+
+
 @app.get("/api/devices")
 async def get_devices():
     """Lista todos los dispositivos con su estado actual."""

@@ -205,6 +205,27 @@ def upsert_tracking_event(imei: str, lat: float, lon: float,
     conn.close()
 
 
+def get_emergencies(imei: str = None, limit: int = 200) -> list:
+    """Retorna todos los eventos de emergencia con detalle completo."""
+    conn = get_conn()
+    c = conn.cursor()
+    if imei:
+        c.execute("""
+            SELECT * FROM events
+            WHERE imei = ? AND event_type = 'EMERGENCY'
+            ORDER BY created_at DESC LIMIT ?
+        """, (imei, limit))
+    else:
+        c.execute("""
+            SELECT * FROM events
+            WHERE event_type = 'EMERGENCY'
+            ORDER BY created_at DESC LIMIT ?
+        """, (limit,))
+    rows = [dict(r) for r in c.fetchall()]
+    conn.close()
+    return rows
+
+
 def get_all_devices() -> list:
     conn = get_conn()
     c = conn.cursor()

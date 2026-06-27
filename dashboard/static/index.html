@@ -121,6 +121,9 @@
         <button onclick="clearFilter()" id="clear-filter-btn" class="hidden bg-slate-700 hover:bg-slate-600 border border-slate-600 px-3 py-1 rounded-lg text-xs transition">
           × Todos
         </button>
+        <select id="device-filter" onchange="filterByDeviceSelect()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
+          <option value="">Todos los equipos</option>
+        </select>
         <select id="event-type-filter" onchange="filterEvents()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
           <option value="">Todos los eventos</option>
           <option value="BOOT">🔄 BOOT — Reinicios</option>
@@ -138,6 +141,22 @@
     </div>
     <div id="events-list" class="divide-y divide-slate-800/80 max-h-[500px] overflow-y-auto">
       <div class="p-8 text-center text-slate-500 text-sm">Cargando eventos...</div>
+    </div>
+  </div>
+
+  <!-- Registro de emergencias -->
+  <div class="card rounded-xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h2 class="font-semibold text-white text-sm">🚨 Registro de emergencias</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Historial completo de activaciones del sistema</p>
+      </div>
+      <select id="emergency-device-filter" onchange="loadEmergencies()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
+        <option value="">Todos los equipos</option>
+      </select>
+    </div>
+    <div id="emergencies-list" class="overflow-x-auto">
+      <div class="p-8 text-center text-slate-500 text-sm">Cargando emergencias...</div>
     </div>
   </div>
 
@@ -208,7 +227,7 @@
 
   async function loadAll() {
     document.getElementById("refresh-icon").textContent = "⟳";
-    await Promise.all([loadDevices(), loadEvents()]);
+    await Promise.all([loadDevices(), loadEvents(), loadEmergencies()]);
     const now = new Date().toLocaleTimeString("es-CO", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
     document.getElementById("last-update").textContent = "Actualizado " + now;
     document.getElementById("refresh-icon").textContent = "↻";
@@ -241,6 +260,12 @@
       // Construir diccionario imei → nombre para los eventos
       deviceNames = {};
       for (const d of devices) { deviceNames[d.imei] = d.name || null; }
+
+      // Poblar selectores de dispositivo
+      const opts = '<option value="">Todos los equipos</option>' +
+        devices.map(d => `<option value="${d.imei}">${d.name || d.imei}</option>`).join("");
+      document.getElementById("device-filter").innerHTML = opts;
+      document.getElementById("emergency-device-filter").innerHTML = opts;
 
       const container = document.getElementById("devices-table");
       if (devices.length === 0) {
@@ -414,6 +439,76 @@
     } catch(e) {
       alert("No se pudo guardar: " + e.message);
     }
+  }
+
+  function filterByDeviceSelect() {
+    const imei = document.getElementById("device-filter").value;
+    if (imei) {
+      const name = deviceNames[imei] || imei;
+      filterByDevice(imei, name);
+    } else {
+      clearFilter();
+    }
+  }
+
+  async function loadEmergencies() {
+    const imei = document.getElementById("emergency-device-filter").value;
+    const url  = imei ? `/api/emergencies?imei=${imei}` : "/api/emergencies";
+    try {
+      const res  = await fetch(url);
+      const data = await res.json();
+      renderEmergencies(data);
+    } catch(e) {
+      document.getElementById("emergencies-list").innerHTML =
+        '<div class="p-6 text-red-400 text-sm text-center">Error al cargar emergencias</div>';
+    }
+  }
+
+  function renderEmergencies(emergencies) {
+    const container = document.getElementById("emergencies-list");
+    if (!emergencies.length) {
+      container.innerHTML = '<div class="p-10 text-center text-slate-500 text-sm">No hay emergencias registradas.</div>';
+      return;
+    }
+
+    let html = `<table class="w-full text-sm border-collapse">
+      <thead><tr class="text-xs text-slate-500 border-b border-slate-800 bg-slate-900/50">
+        <th class="px-5 py-3 text-left font-medium">#</th>
+        <th class="px-5 py-3 text-left font-medium">Dispositivo</th>
+        <th class="px-5 py-3 text-left font-medium">Fecha y hora</th>
+        <th class="px-5 py-3 text-left font-medium">Coordenadas</th>
+        <th class="px-5 py-3 text-left font-medium">Mensaje</th>
+        <th class="px-5 py-3 text-left font-medium">Mapa</th>
+      </tr></thead><tbody>`;
+
+    emergencies.forEach((e, i) => {
+      const name     = e.device_name     || deviceNames[e.imei] || "Sin nombre";
+      const location = e.device_location || "Sin ubicación";
+      const hasGps   = e.lat !== 0.0 || e.lon !== 0.0;
+      const gpsCell  = hasGps
+        ? `<a href="https://maps.google.com/?q=${e.lat},${e.lon}" target="_blank"
+             class="text-blue-400 hover:text-blue-300 text-xs flex items-center gap-1">📍 Ver mapa</a>`
+        : `<span class="text-slate-600 text-xs">Sin GPS</span>`;
+      const coords   = hasGps
+        ? `<span class="font-mono text-xs text-slate-400">${e.lat.toFixed(6)}, ${e.lon.toFixed(6)}</span>`
+        : `<span class="text-slate-600 text-xs">—</span>`;
+
+      html += `<tr class="border-b border-slate-800/50 bg-red-950/5 hover:bg-red-950/15 transition">
+        <td class="px-5 py-3.5 text-slate-500 text-xs">${emergencies.length - i}</td>
+        <td class="px-5 py-3.5">
+          <p class="font-medium text-white text-sm">${name}</p>
+          <p class="text-xs text-slate-500">📍 ${location}</p>
+          <p class="text-xs text-slate-600 font-mono mt-0.5">${e.imei}</p>
+        </td>
+        <td class="px-5 py-3.5 text-slate-300 text-xs whitespace-nowrap">${formatDate(e.created_at)}</td>
+        <td class="px-5 py-3.5">${coords}</td>
+        <td class="px-5 py-3.5 text-slate-400 text-xs">${e.message || "—"}</td>
+        <td class="px-5 py-3.5">${gpsCell}</td>
+      </tr>`;
+    });
+
+    html += "</tbody></table>";
+    container.innerHTML = html;
   }
 
   loadAll();
