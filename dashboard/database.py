@@ -10,18 +10,14 @@ DB_PATH = os.environ.get("DB_PATH", "dea_monitor.db")
 
 
 def get_conn():
-    """Retorna una conexión SQLite con row_factory para dicts."""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
 
 
 def init_db():
-    """Crea las tablas si no existen."""
     conn = get_conn()
     c = conn.cursor()
-
-    # Tabla de dispositivos — un registro por IMEI
     c.execute("""
         CREATE TABLE IF NOT EXISTS devices (
             imei        TEXT PRIMARY KEY,
@@ -38,8 +34,6 @@ def init_db():
             created_at  TEXT
         )
     """)
-
-    # Tabla de eventos — heartbeats, errores, emergencias
     c.execute("""
         CREATE TABLE IF NOT EXISTS events (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,8 +48,6 @@ def init_db():
             created_at  TEXT NOT NULL
         )
     """)
-
-    # Tabla de posiciones GPS — para historial de tracking
     c.execute("""
         CREATE TABLE IF NOT EXISTS positions (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -67,7 +59,6 @@ def init_db():
             created_at  TEXT NOT NULL
         )
     """)
-
     conn.commit()
     conn.close()
 
@@ -77,12 +68,10 @@ def now_utc() -> str:
 
 
 def upsert_device(imei: str, data: dict):
-    """Crea o actualiza el registro del dispositivo."""
     conn = get_conn()
     c = conn.cursor()
     c.execute("SELECT imei FROM devices WHERE imei = ?", (imei,))
     exists = c.fetchone()
-
     if exists:
         c.execute("""
             UPDATE devices SET
@@ -113,18 +102,12 @@ def upsert_device(imei: str, data: dict):
                  last_signal, uptime_s, boot_count, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
-            imei,
-            now_utc(),
-            data.get("lat", 0.0),
-            data.get("lon", 0.0),
-            data.get("rssi", 0),
-            data.get("temp", 0.0),
-            data.get("signal", ""),
-            data.get("uptime_s", 0),
-            data.get("is_boot", 0),
-            now_utc(),
+            imei, now_utc(),
+            data.get("lat", 0.0), data.get("lon", 0.0),
+            data.get("rssi", 0), data.get("temp", 0.0),
+            data.get("signal", ""), data.get("uptime_s", 0),
+            data.get("is_boot", 0), now_utc(),
         ))
-
     conn.commit()
     conn.close()
 
@@ -132,7 +115,6 @@ def upsert_device(imei: str, data: dict):
 def log_event(imei: str, event_type: str, message: str = "",
               lat: float = 0.0, lon: float = 0.0,
               rssi: int = 0, temp: float = 0.0, extra: str = ""):
-    """Inserta un evento en la tabla events."""
     conn = get_conn()
     c = conn.cursor()
     c.execute("""
@@ -145,7 +127,6 @@ def log_event(imei: str, event_type: str, message: str = "",
 
 def log_position(imei: str, lat: float, lon: float,
                  accuracy_m: int = 999, speed: float = 0.0):
-    """Inserta una posición GPS en la tabla positions."""
     conn = get_conn()
     c = conn.cursor()
     c.execute("""
@@ -157,15 +138,12 @@ def log_position(imei: str, lat: float, lon: float,
 
 
 def upsert_heartbeat(imei: str, data: dict):
-    """
-    Crea o actualiza el ÚNICO registro de heartbeat por dispositivo.
-    Así no se acumula spam de heartbeats en la tabla events.
-    """
+    """Crea o actualiza el ÚNICO registro de heartbeat por dispositivo."""
     conn = get_conn()
     c = conn.cursor()
     c.execute("SELECT id FROM events WHERE imei=? AND event_type='HEARTBEAT'", (imei,))
     row = c.fetchone()
-    ts = now_utc()
+    ts  = now_utc()
     msg = data.get("message", "")
     lat = data.get("lat", 0.0)
     lon = data.get("lon", 0.0)
@@ -186,14 +164,12 @@ def upsert_heartbeat(imei: str, data: dict):
 
 
 def upsert_gps_alert(imei: str):
-    """
-    Crea o actualiza el ÚNICO registro de GPS_TIMEOUT por dispositivo.
-    """
+    """Crea o actualiza el ÚNICO registro de GPS_TIMEOUT por dispositivo."""
     conn = get_conn()
     c = conn.cursor()
     c.execute("SELECT id FROM events WHERE imei=? AND event_type='GPS_TIMEOUT'", (imei,))
     row = c.fetchone()
-    ts = now_utc()
+    ts  = now_utc()
     if row:
         c.execute("UPDATE events SET created_at=? WHERE id=?", (ts, row["id"]))
     else:
@@ -205,21 +181,9 @@ def upsert_gps_alert(imei: str):
     conn.close()
 
 
-
-    conn = get_conn()
-    c = conn.cursor()
-    c.execute("SELECT * FROM devices ORDER BY last_seen DESC")
-    rows = [dict(r) for r in c.fetchall()]
-    conn.close()
-    return rows
-
-
 def upsert_tracking_event(imei: str, lat: float, lon: float,
                           accuracy_m: int = 999, speed: float = 0.0):
-    """
-    Crea o actualiza el ÚNICO evento de tracking por dispositivo.
-    Muestra la última posición GPS recibida.
-    """
+    """Crea o actualiza el ÚNICO evento de tracking por dispositivo."""
     conn = get_conn()
     c = conn.cursor()
     c.execute("SELECT id FROM events WHERE imei=? AND event_type='TRACKING'", (imei,))
@@ -239,6 +203,15 @@ def upsert_tracking_event(imei: str, lat: float, lon: float,
         """, (imei, msg, lat, lon, ts))
     conn.commit()
     conn.close()
+
+
+def get_all_devices() -> list:
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("SELECT * FROM devices ORDER BY last_seen DESC")
+    rows = [dict(r) for r in c.fetchall()]
+    conn.close()
+    return rows
 
 
 def get_events(imei: str = None, limit: int = 100) -> list:
@@ -272,11 +245,9 @@ def get_positions(imei: str, limit: int = 100) -> list:
 
 
 def update_device_info(imei: str, name: str, location: str):
-    """Actualiza nombre y ubicación de un dispositivo."""
     conn = get_conn()
     c = conn.cursor()
-    c.execute("""
-        UPDATE devices SET name = ?, location = ? WHERE imei = ?
-    """, (name, location, imei))
+    c.execute("UPDATE devices SET name = ?, location = ? WHERE imei = ?",
+              (name, location, imei))
     conn.commit()
     conn.close()
