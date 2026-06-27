@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+dea_monitor.db
+venv/
+.venv/

@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEA Monitor — Late Corazón</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #0f172a; }
+    .card { background: #1e293b; border: 1px solid #334155; }
+    .online-dot  { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .offline-dot { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+    .badge-boot      { background: #3b82f6; }
+    .badge-gps       { background: #f59e0b; }
+    .badge-error     { background: #ef4444; }
+    .badge-heartbeat { background: #6b7280; }
+    .badge-emergency { background: #dc2626; }
+    .badge-sms       { background: #8b5cf6; }
+    .badge-call      { background: #06b6d4; }
+    .badge-cancelled { background: #64748b; }
+    .badge-answered  { background: #22c55e; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #1e293b; }
+    ::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+  </style>
+</head>
+<body class="text-slate-200 min-h-screen">
+
+  <!-- Header -->
+  <header class="border-b border-slate-700 px-6 py-4 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold text-sm">♥</div>
+      <div>
+        <h1 class="text-lg font-bold text-white">DEA Monitor</h1>
+        <p class="text-xs text-slate-400">Late Corazón — Sistema de monitoreo remoto</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <span id="last-update" class="text-xs text-slate-500">Actualizando...</span>
+      <button onclick="loadAll()" class="bg-slate-700 hover:bg-slate-600 px-3 py-1.5 rounded text-xs transition">
+        ↻ Actualizar
+      </button>
+    </div>
+  </header>
+
+  <main class="p-6 space-y-6 max-w-7xl mx-auto">
+
+    <!-- Resumen -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="summary-cards">
+      <div class="card rounded-xl p-4">
+        <p class="text-xs text-slate-400 mb-1">Total dispositivos</p>
+        <p class="text-3xl font-bold text-white" id="total-devices">—</p>
+      </div>
+      <div class="card rounded-xl p-4">
+        <p class="text-xs text-slate-400 mb-1">En línea</p>
+        <p class="text-3xl font-bold text-green-400" id="online-devices">—</p>
+      </div>
+      <div class="card rounded-xl p-4">
+        <p class="text-xs text-slate-400 mb-1">Sin señal</p>
+        <p class="text-3xl font-bold text-red-400" id="offline-devices">—</p>
+      </div>
+      <div class="card rounded-xl p-4">
+        <p class="text-xs text-slate-400 mb-1">Eventos hoy</p>
+        <p class="text-3xl font-bold text-blue-400" id="events-today">—</p>
+      </div>
+    </div>
+
+    <!-- Dispositivos -->
+    <div class="card rounded-xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
+        <h2 class="font-semibold text-white">Dispositivos</h2>
+        <span class="text-xs text-slate-400">Click en un dispositivo para ver su historial</span>
+      </div>
+      <div id="devices-table" class="overflow-x-auto">
+        <p class="p-6 text-slate-500 text-sm">Cargando dispositivos...</p>
+      </div>
+    </div>
+
+    <!-- Eventos recientes -->
+    <div class="card rounded-xl overflow-hidden">
+      <div class="px-5 py-4 border-b border-slate-700 flex items-center justify-between">
+        <h2 class="font-semibold text-white">
+          Eventos recientes
+          <span id="events-filter-label" class="text-xs font-normal text-slate-400 ml-2"></span>
+        </h2>
+        <div class="flex gap-2">
+          <button onclick="clearFilter()" id="clear-filter-btn" class="hidden bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-xs transition">
+            × Todos los dispositivos
+          </button>
+          <select id="event-type-filter" onchange="filterEvents()" class="bg-slate-700 text-slate-200 text-xs px-2 py-1 rounded border border-slate-600">
+            <option value="">Todos los tipos</option>
+            <option value="BOOT">BOOT</option>
+            <option value="GPS_TIMEOUT">GPS_TIMEOUT</option>
+            <option value="ERROR">ERROR</option>
+            <option value="EMERGENCY">EMERGENCY</option>
+            <option value="SMS_SENT">SMS_SENT</option>
+            <option value="CALL">CALL</option>
+            <option value="HEARTBEAT">HEARTBEAT</option>
+          </select>
+        </div>
+      </div>
+      <div id="events-list" class="divide-y divide-slate-700/50 max-h-96 overflow-y-auto">
+        <p class="p-6 text-slate-500 text-sm">Cargando eventos...</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Modal editar dispositivo -->
+  <div id="edit-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+    <div class="card rounded-xl p-6 w-full max-w-md mx-4">
+      <h3 class="font-semibold text-white mb-4">Editar dispositivo</h3>
+      <input type="hidden" id="edit-imei" />
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Nombre</label>
+          <input id="edit-name" type="text" placeholder="Ej: DEA Envigado — Piso 1"
+            class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-400 mb-1 block">Ubicación</label>
+          <input id="edit-location" type="text" placeholder="Ej: Centro Comercial El Salado, Envigado"
+            class="w-full bg-slate-700 border border-slate-600 rounded px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500" />
+        </div>
+      </div>
+      <div class="flex gap-3 mt-5">
+        <button onclick="saveDevice()" class="flex-1 bg-blue-600 hover:bg-blue-500 py-2 rounded text-sm font-medium transition">Guardar</button>
+        <button onclick="closeModal()" class="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded text-sm transition">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  let allEvents = [];
+  let activeImei = null;
+
+  // ── Carga principal ──────────────────────────────────────────
+  async function loadAll() {
+    await Promise.all([loadDevices(), loadEvents()]);
+    document.getElementById("last-update").textContent =
+      "Actualizado: " + new Date().toLocaleTimeString("es-CO");
+  }
+
+  // ── Dispositivos ─────────────────────────────────────────────
+  async function loadDevices() {
+    try {
+      const res = await fetch("/api/devices");
+      const devices = await res.json();
+
+      const online  = devices.filter(d => d.online).length;
+      const offline = devices.filter(d => !d.online).length;
+
+      document.getElementById("total-devices").textContent  = devices.length;
+      document.getElementById("online-devices").textContent = online;
+      document.getElementById("offline-devices").textContent = offline;
+
+      const container = document.getElementById("devices-table");
+
+      if (devices.length === 0) {
+        container.innerHTML = '<p class="p-6 text-slate-500 text-sm">No hay dispositivos registrados todavía.</p>';
+        return;
+      }
+
+      let html = `
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-xs text-slate-400 border-b border-slate-700">
+              <th class="px-5 py-3 text-left">Estado</th>
+              <th class="px-5 py-3 text-left">Dispositivo</th>
+              <th class="px-5 py-3 text-left">IMEI</th>
+              <th class="px-5 py-3 text-left">Señal</th>
+              <th class="px-5 py-3 text-left">Temp</th>
+              <th class="px-5 py-3 text-left">Reinicios</th>
+              <th class="px-5 py-3 text-left">Último reporte</th>
+              <th class="px-5 py-3 text-left">GPS</th>
+              <th class="px-5 py-3 text-left"></th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      for (const d of devices) {
+        const dotClass  = d.online ? "online-dot" : "offline-dot";
+        const statusTxt = d.online ? "En línea" : "Sin señal";
+        const name      = d.name     || "Sin nombre";
+        const location  = d.location || "Sin ubicación";
+        const lastSeen  = d.minutes_ago === 999 ? "Nunca"
+                        : d.minutes_ago === 0   ? "Ahora"
+                        : d.minutes_ago + " min atrás";
+        const hasGps = d.last_lat !== 0.0 || d.last_lon !== 0.0;
+        const gpsLink = hasGps
+          ? `<a href="https://maps.google.com/?q=${d.last_lat},${d.last_lon}" target="_blank"
+               class="text-blue-400 hover:text-blue-300 text-xs">📍 Ver mapa</a>`
+          : `<span class="text-slate-500 text-xs">Sin GPS</span>`;
+
+        const rowClass = !d.online ? "bg-red-950/20" : "";
+
+        html += `
+          <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 cursor-pointer transition ${rowClass}"
+              onclick="filterByDevice('${d.imei}', '${name}')">
+            <td class="px-5 py-3">
+              <div class="flex items-center gap-2">
+                <div class="w-2.5 h-2.5 rounded-full ${dotClass}"></div>
+                <span class="text-xs ${d.online ? 'text-green-400' : 'text-red-400'}">${statusTxt}</span>
+              </div>
+            </td>
+            <td class="px-5 py-3">
+              <p class="font-medium text-white">${name}</p>
+              <p class="text-xs text-slate-400">${location}</p>
+            </td>
+            <td class="px-5 py-3 text-slate-400 font-mono text-xs">${d.imei}</td>
+            <td class="px-5 py-3 text-slate-300">${d.last_signal || "—"}</td>
+            <td class="px-5 py-3 text-slate-300">${d.last_temp ? d.last_temp + " °C" : "—"}</td>
+            <td class="px-5 py-3 text-slate-300">${d.boot_count}</td>
+            <td class="px-5 py-3 text-slate-400 text-xs">${lastSeen}</td>
+            <td class="px-5 py-3">${gpsLink}</td>
+            <td class="px-5 py-3">
+              <button onclick="event.stopPropagation(); openEdit('${d.imei}','${d.name || ''}','${d.location || ''}')"
+                class="text-xs text-slate-400 hover:text-white bg-slate-700 hover:bg-slate-600 px-2 py-1 rounded transition">
+                ✏️ Editar
+              </button>
+            </td>
+          </tr>
+        `;
+      }
+
+      html += "</tbody></table>";
+      container.innerHTML = html;
+
+    } catch(e) {
+      document.getElementById("devices-table").innerHTML =
+        '<p class="p-6 text-red-400 text-sm">Error cargando dispositivos: ' + e.message + '</p>';
+    }
+  }
+
+  // ── Eventos ──────────────────────────────────────────────────
+  async function loadEvents() {
+    try {
+      const url = activeImei ? `/api/events?imei=${activeImei}&limit=200` : "/api/events?limit=200";
+      const res = await fetch(url);
+      allEvents = await res.json();
+
+      // Contar eventos de hoy
+      const today = new Date().toISOString().slice(0, 10);
+      const todayCount = allEvents.filter(e => e.created_at && e.created_at.startsWith(today)).length;
+      document.getElementById("events-today").textContent = todayCount;
+
+      renderEvents(allEvents);
+    } catch(e) {
+      document.getElementById("events-list").innerHTML =
+        '<p class="p-4 text-red-400 text-sm">Error cargando eventos: ' + e.message + '</p>';
+    }
+  }
+
+  function renderEvents(events) {
+    const container = document.getElementById("events-list");
+
+    if (events.length === 0) {
+      container.innerHTML = '<p class="p-6 text-slate-500 text-sm">No hay eventos registrados.</p>';
+      return;
+    }
+
+    const badges = {
+      BOOT:       "badge-boot",
+      GPS_TIMEOUT:"badge-gps",
+      ERROR:      "badge-error",
+      HEARTBEAT:  "badge-heartbeat",
+      EMERGENCY:  "badge-emergency",
+      SMS_SENT:   "badge-sms",
+      CALL:       "badge-call",
+      CANCELLED:  "badge-cancelled",
+      ANSWERED:   "badge-answered",
+    };
+
+    const icons = {
+      BOOT:       "🔄",
+      GPS_TIMEOUT:"📡",
+      ERROR:      "❌",
+      HEARTBEAT:  "💓",
+      EMERGENCY:  "🚨",
+      SMS_SENT:   "💬",
+      CALL:       "📞",
+      CANCELLED:  "✋",
+      ANSWERED:   "✅",
+    };
+
+    let html = "";
+    for (const e of events) {
+      const badge = badges[e.event_type] || "badge-heartbeat";
+      const icon  = icons[e.event_type]  || "•";
+      const hasGps = e.lat !== 0.0 || e.lon !== 0.0;
+      const gpsLink = hasGps
+        ? `<a href="https://maps.google.com/?q=${e.lat},${e.lon}" target="_blank"
+             class="text-blue-400 hover:text-blue-300 ml-2 text-xs">📍</a>`
+        : "";
+
+      html += `
+        <div class="px-5 py-3 flex items-start gap-3 hover:bg-slate-700/20 transition">
+          <span class="text-base mt-0.5">${icon}</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs px-2 py-0.5 rounded-full text-white font-medium ${badge}">${e.event_type}</span>
+              <span class="text-xs text-slate-500 font-mono">${e.imei}</span>
+              ${e.extra ? `<span class="text-xs text-slate-400">${e.extra}</span>` : ""}
+              ${gpsLink}
+            </div>
+            ${e.message ? `<p class="text-xs text-slate-400 mt-0.5">${e.message}</p>` : ""}
+          </div>
+          <span class="text-xs text-slate-500 whitespace-nowrap">${e.created_at || ""}</span>
+        </div>
+      `;
+    }
+
+    container.innerHTML = html;
+  }
+
+  function filterEvents() {
+    const type = document.getElementById("event-type-filter").value;
+    const filtered = type ? allEvents.filter(e => e.event_type === type) : allEvents;
+    renderEvents(filtered);
+  }
+
+  function filterByDevice(imei, name) {
+    activeImei = imei;
+    document.getElementById("events-filter-label").textContent = "— " + name;
+    document.getElementById("clear-filter-btn").classList.remove("hidden");
+    loadEvents();
+  }
+
+  function clearFilter() {
+    activeImei = null;
+    document.getElementById("events-filter-label").textContent = "";
+    document.getElementById("clear-filter-btn").classList.add("hidden");
+    loadEvents();
+  }
+
+  // ── Modal editar ─────────────────────────────────────────────
+  function openEdit(imei, name, location) {
+    document.getElementById("edit-imei").value     = imei;
+    document.getElementById("edit-name").value     = name;
+    document.getElementById("edit-location").value = location;
+    document.getElementById("edit-modal").classList.remove("hidden");
+  }
+
+  function closeModal() {
+    document.getElementById("edit-modal").classList.add("hidden");
+  }
+
+  async function saveDevice() {
+    const imei     = document.getElementById("edit-imei").value;
+    const name     = document.getElementById("edit-name").value;
+    const location = document.getElementById("edit-location").value;
+
+    await fetch(`/api/devices/${imei}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, location }),
+    });
+
+    closeModal();
+    loadDevices();
+  }
+
+  // ── Auto-refresh cada 30 segundos ────────────────────────────
+  loadAll();
+  setInterval(loadAll, 30000);
+</script>
+</body>
+</html>

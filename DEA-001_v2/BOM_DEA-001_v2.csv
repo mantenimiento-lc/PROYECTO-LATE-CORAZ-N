@@ -1,0 +1,58 @@
+Referencia,Valor,Descripcion,Footprint,Cantidad,Notas
+U1,IP2312,Cargador USB-C + BMS LiPo integrado,SOT23-6,1,Reemplaza TP4056 + proteccion en un solo IC
+U2,ESP32-C3 SuperMini,MCU principal MicroPython,ESP32_C3_SuperMini,1,Footprint castellated holes
+U3,PAM8403,Amplificador audio 3W clase D,SOP-16,1,VDD=5V entrada diferencial desde A7670SA
+U4,A7670SA,Modulo GSM/GPS/LTE Cat-1,A7670SA_Module,1,Footprint con pads de soldadura directa
+U6,XL6009,Boost converter 3.7V a 9V,SOT89-5,1,Ajustar con R_FB1 y R_FB2 para 9V salida
+U7,AMS1117-3.3,Regulador LDO 3.3V 1A,SOT-223,1,Para alimentar ESP32-C3
+Q1,2N2222A,NPN para PWRKEY A7670SA,SOT-23,1,Control encendido/apagado A7670SA
+Q2,2N2222A,NPN para LED status,SOT-23,1,
+Q3,3B14FTA,N-MOSFET corte bateria bajo voltaje,SOT-23,1,Corta A7670SA cuando VBAT < 3.3V
+DZ1,BZX84-C3V3,Zener 3.3V para gate Q3,SOT-23,1,Referencia de voltaje para corte
+D1,SS14,Diodo Schottky proteccion polaridad,SMA,1,En serie con VBAT entrada
+D2,1N4148,Diodo flyback bobina XL6009,SOD-123,1,
+DL1,LED Verde 0603,Power ON,0603,1,Con R5 330ohm a 3.3V
+DL2,LED Amarillo 0603,Red GSM status,0603,1,Conectado a STATUS pin A7670SA
+DL3,LED Azul 0603,GPS fix,0603,1,Controlado por GPIO ESP32
+R1,33k,Divisor voltaje monitor bateria,0603,1,A GPIO ESP32 para leer VBAT
+R2,3.3k,Divisor voltaje monitor bateria bajo,0603,1,Par con R1
+R3,10k,Pull-up GPIO0 reed switch,0603,1,
+R4,10k,Pull-up GPIO1 boton colgar,0603,1,
+R5,330,Limitador corriente LED DL1,0603,1,
+R6,1k,Base Q1 PWRKEY,0603,1,
+R7,100,Serie TX ESP32 -> RXD A7670SA,0603,1,Proteccion ESD UART
+R8,100,Serie RX A7670SA TXD -> ESP32,0603,1,Proteccion ESD UART
+R9,10,Serie VBAT -> A7670SA bypass ruido,0603,1,En serie con VBAT del modulo
+R10,53k,Divisor FB XL6009 parte alta,0603,1,Ajusta VOUT = 9V junto con R11
+R11,2.2,Inductancia XL6009,Inductor_2.2uH,1,Inductor 2.2uH 2A minimo
+R12,10k,Pull-up SDA I2C (reserva),0603,1,Para expansion futura
+R13,10k,Pull-up SCL I2C (reserva),0603,1,Para expansion futura
+C1,22nF,Filtro entrada XL6009,1206,1,
+C2,22nF,Filtro salida XL6009,1206,1,
+C3,10nF,Desacoplamiento AMS1117,1206,1,
+C4,100nF,Desacoplamiento VDD PAM8403,0805,1,
+C5,100nF,Desacoplamiento 3V3 ESP32,0603,1,
+C6,100nF,Desacoplamiento VBAT A7670SA pin 1,0603,1,
+C7,100nF,Desacoplamiento VBAT A7670SA pin 2,0603,1,
+C8,100nF,Desacoplamiento general 3V3,0603,1,
+C9,100nF,Desacoplamiento general GND,0603,1,
+C10,4700uF/25V,Bulk cap VBAT para picos A7670SA,Elec_10x20mm,1,CRITICO: A7670SA necesita 2A en TX
+C11,100uF/16V,Bulk cap salida XL6009,Elec_8x12mm,1,
+L1,2.2uH,Inductor boost XL6009,Inductor_5x5mm,1,Corriente saturacion minimo 3A
+BT1,18650,Bateria Li-Ion 3.7V,BatteryHolder_18650,1,Holder THT con muelle
+J1,USB-C,Conector carga 5V,USB_C_Receptacle,1,Para carga de bateria via IP2312/TP4056
+J2,SMA/UFL,Antena GPS,U.FL,1,Cable pigtail a antena GPS externa
+J3,SMA/UFL,Antena GSM,U.FL,1,Cable pigtail a antena GSM externa
+J4,JST-2P,Conector parlante 8ohm,JST_PH_2pos,1,SPK+ y SPK- del PAM8403
+J5,2-pin,Conector Reed Switch,PinHeader_2pos,1,A reed switch externo en gabinete
+J6,2-pin,Conector boton colgar,PinHeader_2pos,1,A boton externo en gabinete
+J7,MicroUSB/USB-C,Puerto programacion ESP32,USB_C o MicroUSB,1,Para flashear MicroPython
+SIM1,Nano-SIM,Slot SIM push-push,NanoSIM_Slot,1,SIM1 del A7670SA
+SW1,RESET,Boton reset ESP32 en PCB + conector externo,SW_Push_6mm_SMD,1,Conectado a pin EN del ESP32-C3 con C100nF anti-rebote
+SW2,POWER,Boton ON/OFF latching externo corte total,SW_Latching_Conector_2pin,1,Controla gate MOSFET P-channel Q4 para corte total VBAT
+Q4,AO3407,P-MOSFET corte total alimentacion,SOT-23,1,Vgs threshold -1V a -2V — gate controlado por SW2
+R14,100k,Pull-up gate Q4 a VBAT,0603,1,Mantiene Q4 apagado cuando SW2 abierto
+R15,10k,Limitador corriente gate Q4,0603,1,En serie entre SW2 y gate Q4
+C12,100nF,Anti-rebote boton RESET,0603,1,Entre pin EN ESP32 y GND
+J8,2-pin,Conector externo boton RESET,PinHeader_2pos,1,Para boton reset montado en gabinete
+J9,2-pin,Conector externo boton ON/OFF,PinHeader_2pos,1,Para boton power montado en gabinete

@@ -1,0 +1,2517 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "00d7f7b3-4612-4826-99f8-6f3b0c1c14dc")
+	(paper "A3")
+	(title_block
+		(title "DEA-001 v2 — Late Corazon")
+		(date "2026-06-25")
+		(rev "v2.0")
+		(company "Late Corazon")
+		(comment 1 "ESP32-C3 + A7670SA + BMS + Audio")
+		(comment 2 "PCB 50x80mm — Designed in Colombia")
+	)
+	(lib_symbols
+		(symbol "DEA:A7670SA"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U4"
+				(at 0 20 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "A7670SA"
+				(at 0 -20 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "DEA:A7670SA_Module"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "A7670SA_0_1"
+				(rectangle
+					(start -12 18)
+					(end 12 -18)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin power_in line
+					(at -17 16 0)
+					(length 5)
+					(name "VBAT"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -17 14 0)
+					(length 5)
+					(name "GND"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -17 10 0)
+					(length 5)
+					(name "RXD"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at -17 8 0)
+					(length 5)
+					(name "TXD"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -17 4 0)
+					(length 5)
+					(name "PWRKEY"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17 14 0)
+					(length 5)
+					(name "SPK_P"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17 12 0)
+					(length 5)
+					(name "SPK_N"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 17 8 0)
+					(length 5)
+					(name "MIC_P"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at 17 6 0)
+					(length 5)
+					(name "MIC_N"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17 0 0)
+					(length 5)
+					(name "GPS_ANT"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17 -4 0)
+					(length 5)
+					(name "GSM_ANT"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at -17 -14 0)
+					(length 5)
+					(name "STATUS"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "DEA:AMS1117_3V3"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U7"
+				(at 0 6 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "AMS1117-3.3"
+				(at 0 -6 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "AMS1117_3V3_0_1"
+				(rectangle
+					(start -6 4)
+					(end 6 -4)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin power_in line
+					(at -11 2 0)
+					(length 5)
+					(name "VIN"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -11 -2 0)
+					(length 5)
+					(name "GND"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 11 2 0)
+					(length 5)
+					(name "VOUT_3V3"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "DEA:ESP32_C3_SUPERMINI"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U2"
+				(at 0 12 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "ESP32-C3-SuperMini"
+				(at 0 -12 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "DEA:ESP32_C3_SuperMini"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "ESP32_C3_SUPERMINI_0_1"
+				(rectangle
+					(start -10 10)
+					(end 10 -10)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin input line
+					(at -15 8 0)
+					(length 5)
+					(name "GPIO0"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -15 6 0)
+					(length 5)
+					(name "GPIO1"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -15 4 0)
+					(length 5)
+					(name "GPIO20_RX"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -15 2 0)
+					(length 5)
+					(name "GPIO21_TX"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -15 -6 0)
+					(length 5)
+					(name "3V3"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -15 -8 0)
+					(length 5)
+					(name "GND"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 15 8 0)
+					(length 5)
+					(name "5V"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "DEA:PAM8403"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U3"
+				(at 0 10 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "PAM8403"
+				(at 0 -10 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "PAM8403_0_1"
+				(rectangle
+					(start -8 8)
+					(end 8 -8)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin power_in line
+					(at -13 6 0)
+					(length 5)
+					(name "VDD"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -13 2 0)
+					(length 5)
+					(name "GND"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -13 -2 0)
+					(length 5)
+					(name "IN_R"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -13 -4 0)
+					(length 5)
+					(name "IN_L"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 13 6 0)
+					(length 5)
+					(name "OUT_R+"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 13 4 0)
+					(length 5)
+					(name "OUT_R-"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 13 -4 0)
+					(length 5)
+					(name "OUT_L+"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 13 -6 0)
+					(length 5)
+					(name "OUT_L-"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "DEA:Q_MOSFET_N"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "Q3"
+				(at 0 6 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "3B14FTA"
+				(at 0 -6 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Q_MOSFET_N_0_1"
+				(rectangle
+					(start -4 4)
+					(end 4 -4)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin input line
+					(at -9 0 0)
+					(length 5)
+					(name "G"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 9 270)
+					(length 5)
+					(name "D"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -9 90)
+					(length 5)
+					(name "S"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "DEA:TP4056"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U5"
+				(at 0 10 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "TP4056"
+				(at 0 -10 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "TP4056_0_1"
+				(rectangle
+					(start -8 8)
+					(end 8 -8)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin power_in line
+					(at -13 6 0)
+					(length 5)
+					(name "VIN"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -13 2 0)
+					(length 5)
+					(name "GND"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 13 6 0)
+					(length 5)
+					(name "BAT+"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 13 2 0)
+					(length 5)
+					(name "BAT-"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 13 -2 0)
+					(length 5)
+					(name "CHRG"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -13 -4 0)
+					(length 5)
+					(name "PROG"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "DEA:XL6009"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U6"
+				(at 0 8 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "XL6009 Boost 9V"
+				(at 0 -8 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "XL6009_0_1"
+				(rectangle
+					(start -8 6)
+					(end 8 -6)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin power_in line
+					(at -13 4 0)
+					(length 5)
+					(name "VIN"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -13 0 0)
+					(length 5)
+					(name "GND"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin power_out line
+					(at 13 4 0)
+					(length 5)
+					(name "VOUT_9V"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 13 0 0)
+					(length 5)
+					(name "FB"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -13 -4 0)
+					(length 5)
+					(name "SW"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.016 1.016)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(text "=== BLOQUE 3: A7670SA ==="
+		(exclude_from_sim no)
+		(at 220 10 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+		)
+		(uuid "0e8a7948-8ecb-46fa-b61f-836cd8dfc9c7")
+	)
+	(text "=== BLOQUE 2: MCU ==="
+		(exclude_from_sim no)
+		(at 120 10 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+		)
+		(uuid "5f540735-a81e-4e0c-ab0d-a986ebe9dcbd")
+	)
+	(text "=== BLOQUE 4: AUDIO ==="
+		(exclude_from_sim no)
+		(at 20 110 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+		)
+		(uuid "946ca213-1634-49a9-b3b4-d35d67635a29")
+	)
+	(text "=== BLOQUE 5: ENTRADAS ==="
+		(exclude_from_sim no)
+		(at 220 110 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+		)
+		(uuid "b69c9c17-eb4f-4fac-aa16-57b792c1cbb9")
+	)
+	(text "=== BLOQUE 1: ALIMENTACION ==="
+		(exclude_from_sim no)
+		(at 20 10 0)
+		(effects
+			(font
+				(size 2 2)
+				(bold yes)
+			)
+		)
+		(uuid "dce4fa32-cb89-467e-a8ea-3cf20955d359")
+	)
+	(junction
+		(at 200 80)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "5a830267-06ae-4c4c-99f0-b3a5f6fc3445")
+	)
+	(junction
+		(at 50 30)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ea58145e-cfac-44be-98d9-61d0346e6372")
+	)
+	(no_connect
+		(at 160 73)
+		(uuid "29b0e729-ca42-4ad7-9fef-8afe9e524c47")
+	)
+	(no_connect
+		(at 260 61)
+		(uuid "77705c83-c8be-4323-a182-d4f3ecda291a")
+	)
+	(no_connect
+		(at 260 57)
+		(uuid "b18b09f9-64f3-4ee1-a4ab-d86bea227cd5")
+	)
+	(wire
+		(pts
+			(xy 100 30) (xy 130 30)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "02789a0c-cc2e-47e4-8e38-8fdb90782c96")
+	)
+	(wire
+		(pts
+			(xy 50 50) (xy 80 50)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4bb807e8-7f0d-477f-b455-297593b7af82")
+	)
+	(wire
+		(pts
+			(xy 50 20) (xy 50 30)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "67d6b8a2-3052-4eba-8d97-e56408d91bdb")
+	)
+	(wire
+		(pts
+			(xy 200 80) (xy 230 80)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "69e19ab8-2f3d-433f-a504-ae849d1ba9b8")
+	)
+	(wire
+		(pts
+			(xy 50 30) (xy 80 30)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "705270e8-c10f-43b7-b874-e07769512956")
+	)
+	(wire
+		(pts
+			(xy 50 30) (xy 50 50)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7cb68a4f-2d78-4c8f-a4cb-4831cb3d8780")
+	)
+	(wire
+		(pts
+			(xy 200 60) (xy 200 80)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9adaed52-a0ab-4ea2-b5f2-714af8ac48e8")
+	)
+	(wire
+		(pts
+			(xy 30 20) (xy 50 20)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a6b088a3-13cc-425a-b083-5079d65d09fe")
+	)
+	(wire
+		(pts
+			(xy 100 20) (xy 100 30)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a71cb92f-6c78-463e-87cb-62e129abe2e9")
+	)
+	(wire
+		(pts
+			(xy 150 30) (xy 150 50)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b1c4ab6f-8122-4465-8ba5-a62d108e0fd5")
+	)
+	(wire
+		(pts
+			(xy 200 80) (xy 200 100)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b832c566-821c-4331-a75f-b7c70251a2bf")
+	)
+	(wire
+		(pts
+			(xy 150 50) (xy 180 50)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ee5435e2-342d-4b53-829f-8be83b76caed")
+	)
+	(global_label "VBAT"
+		(shape input)
+		(at 10 115 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "0f98bd13-3639-47e4-9709-e9cc5262a7dd")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 10 115 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VBAT"
+		(shape input)
+		(at 10 85 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "40154a35-c94b-4c0a-aee2-9dbed5747ed1")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 10 85 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VOUT_9V"
+		(shape output)
+		(at 70 85 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "52c5b76d-4add-46f4-8702-ee071f2b2ae0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 70 85 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VBAT"
+		(shape output)
+		(at 70 50 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "54036b62-1e67-49b8-874f-78a09ea93e60")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 70 50 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "SPK_N"
+		(shape input)
+		(at 10 143 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "6b1f52f1-d624-45c1-8e23-5f01306db5cd")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 10 143 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VOUT_9V"
+		(shape input)
+		(at 230 65 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "719b27cf-6459-4d2c-84df-66b70a265a22")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 230 65 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "SPK_N"
+		(shape output)
+		(at 290 65 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "7ffd5ac1-059a-4f4b-ad48-b76ca4946065")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 290 65 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "3V3"
+		(shape input)
+		(at 130 65 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "847ccdaf-2f3f-4a60-a470-70bb00af1b42")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 130 65 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "UART_TX"
+		(shape input)
+		(at 230 69 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "87c2084b-bacd-4e3e-a50e-09a631ee839b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 230 69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "3V3"
+		(shape output)
+		(at 70 115 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "87cffaf1-0d13-47ad-8fd4-b5837ef56752")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 70 115 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "UART_RX"
+		(shape input)
+		(at 230 71 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "a2bd75aa-face-402a-afd3-b73d7a911304")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 230 71 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "UART_RX"
+		(shape output)
+		(at 200 65 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "ac0e05d3-bf3a-47b6-aa17-3deed9314d8d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 200 65 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "UART_TX"
+		(shape output)
+		(at 200 63 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "b5fa030f-0a53-4855-b390-325634d1a08f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 200 63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VIN_5V"
+		(shape input)
+		(at 10 50 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "cd421b5a-1696-4d51-87bf-628cf09ba91b")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 10 50 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "SPK_P"
+		(shape output)
+		(at 290 63 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "ce828df1-ad3e-42d4-a7eb-2b1dbf2717fe")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 290 63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "SPK_P"
+		(shape input)
+		(at 10 141 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "e4c3bcda-7863-41ba-bc55-936dd5e0f0d0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 10 141 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(global_label "VBAT"
+		(shape input)
+		(at 10 145 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "fb8463e0-2c82-4105-8756-9ffaa54d76c2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 10 145 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "DEA:ESP32_C3_SUPERMINI")
+		(at 160 65 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "44d5ea7d-1e47-474c-ba63-61a935194b44")
+		(property "Reference" "U2"
+			(at 160 53 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "ESP32-C3-SuperMini"
+			(at 160 77 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 160 65 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 160 65 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 160 65 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "e5122571-7ae8-45ee-b312-4f1a0e691bd2")
+		)
+		(pin "2"
+			(uuid "f17d4bfe-933b-4f4f-a3ba-37e05b48f123")
+		)
+		(pin "4"
+			(uuid "06ed4454-5734-4c81-b5e9-02f0a3b2d42b")
+		)
+		(pin "5"
+			(uuid "028f2c83-10f6-4be3-89e6-fd8f9ef24d07")
+		)
+		(pin "6"
+			(uuid "68d39e90-8382-44cd-9b0b-5f6ad55424fb")
+		)
+		(pin "7"
+			(uuid "c9876607-ab85-4cea-9cbf-cb77f599d907")
+		)
+		(pin "3"
+			(uuid "85501b77-b8c6-4a18-a59b-e89baea2fc4e")
+		)
+		(instances
+			(project "DEA-001_v2"
+				(path "/00d7f7b3-4612-4826-99f8-6f3b0c1c14dc"
+					(reference "U2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "DEA:XL6009")
+		(at 40 85 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "7b473dda-e611-49a1-b086-76c2d3ba11e8")
+		(property "Reference" "U6"
+			(at 40 78 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "XL6009 Boost 9V"
+			(at 40 92 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 40 85 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 40 85 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 40 85 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "3"
+			(uuid "bff9b3d4-c9bc-4ebc-8dd7-8817530ecdda")
+		)
+		(pin "1"
+			(uuid "5457057d-9eee-4d67-9336-b3aeb378480d")
+		)
+		(pin "4"
+			(uuid "902612a4-fc43-49ae-99b5-efec6397ed46")
+		)
+		(pin "2"
+			(uuid "a0014fee-6e7e-4183-9050-25b419e8dc0b")
+		)
+		(pin "5"
+			(uuid "e1015803-73f2-444d-ba5b-91f0406b336a")
+		)
+		(instances
+			(project "DEA-001_v2"
+				(path "/00d7f7b3-4612-4826-99f8-6f3b0c1c14dc"
+					(reference "U6")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "DEA:AMS1117_3V3")
+		(at 40 115 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "89cce96a-2b88-4a5a-a822-a1b590b3fdfa")
+		(property "Reference" "U7"
+			(at 40 109 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "AMS1117-3.3"
+			(at 40 121 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 40 115 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 40 115 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 40 115 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "3"
+			(uuid "12884bfb-f153-4a46-a1de-d89802b1ce38")
+		)
+		(pin "1"
+			(uuid "1014477c-3699-4eea-ac74-18a2150fdadb")
+		)
+		(pin "2"
+			(uuid "3dd9da12-6c0e-4903-97c2-d760d399a479")
+		)
+		(instances
+			(project "DEA-001_v2"
+				(path "/00d7f7b3-4612-4826-99f8-6f3b0c1c14dc"
+					(reference "U7")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "DEA:PAM8403")
+		(at 40 145 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "95b7022c-1cf8-4c4a-a776-79a973432b57")
+		(property "Reference" "U3"
+			(at 40 135 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "PAM8403"
+			(at 40 155 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 40 145 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 40 145 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 40 145 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "e663d5df-6727-4f07-9e13-1272389e71ac")
+		)
+		(pin "3"
+			(uuid "7c2bf823-5f82-4e5c-bd0b-368d7fbe5500")
+		)
+		(pin "1"
+			(uuid "8d8a9642-8f10-4d32-8aaf-02e1d749fd38")
+		)
+		(pin "5"
+			(uuid "5a94141c-2809-487c-9e1c-1601b9a19852")
+		)
+		(pin "4"
+			(uuid "f8178caf-fb79-4b67-8812-19c900b32bd2")
+		)
+		(pin "7"
+			(uuid "77c3c167-e070-46c3-90c8-5bb654b039ce")
+		)
+		(pin "6"
+			(uuid "a6c6f15c-0fb2-4a1f-849a-a0b2cb083b1a")
+		)
+		(pin "8"
+			(uuid "dc8a3442-edec-445f-a18e-61aab13eb88e")
+		)
+		(instances
+			(project "DEA-001_v2"
+				(path "/00d7f7b3-4612-4826-99f8-6f3b0c1c14dc"
+					(reference "U3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "DEA:Q_MOSFET_N")
+		(at 90 85 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "987efa66-42c8-4326-8e77-cfb1e99fde8e")
+		(property "Reference" "Q3"
+			(at 90 79 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "3B14FTA"
+			(at 90 91 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 90 85 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 90 85 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 90 85 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "62838cdb-8095-42f2-8c1d-c2767c80c037")
+		)
+		(pin "2"
+			(uuid "0a676973-01ea-4181-aa44-d1fe727e2eda")
+		)
+		(pin "3"
+			(uuid "720ee1a8-4e48-4f90-97dd-f0f6f558b4c0")
+		)
+		(instances
+			(project "DEA-001_v2"
+				(path "/00d7f7b3-4612-4826-99f8-6f3b0c1c14dc"
+					(reference "Q3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "DEA:TP4056")
+		(at 40 50 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "abb74ca9-5b26-4758-ba09-6d0d2bd65a44")
+		(property "Reference" "U5"
+			(at 40 42 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "TP4056"
+			(at 40 58 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 40 50 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 40 50 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 40 50 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "51d24d06-4aad-4340-a5d5-f4bf09d7ed00")
+		)
+		(pin "3"
+			(uuid "ce60bfc8-d41c-4e80-baa5-5cd79624a3d2")
+		)
+		(pin "5"
+			(uuid "cee67233-0c28-407a-a874-3f7b7873baa8")
+		)
+		(pin "6"
+			(uuid "e7750e4f-73cb-45bb-b44d-8f5279e99a8c")
+		)
+		(pin "4"
+			(uuid "72b3d806-c05e-4ff6-b8e8-c626610f6c04")
+		)
+		(pin "2"
+			(uuid "73e25e15-a1f8-4397-91c4-0cdaf6d9318c")
+		)
+		(instances
+			(project "DEA-001_v2"
+				(path "/00d7f7b3-4612-4826-99f8-6f3b0c1c14dc"
+					(reference "U5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "DEA:A7670SA")
+		(at 260 65 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(uuid "c8f90b81-ce12-4523-81e8-421c0c9f2774")
+		(property "Reference" "U4"
+			(at 260 45 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "A7670SA"
+			(at 260 85 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 260 65 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 260 65 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 260 65 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "7"
+			(uuid "9c826a23-cdf4-4cc6-9816-885f1e493d5c")
+		)
+		(pin "5"
+			(uuid "8a98a016-ce5c-44dc-958e-6a6d46e84a80")
+		)
+		(pin "1"
+			(uuid "eac9ee39-64ca-4aab-8f74-af5f601d9cb3")
+		)
+		(pin "4"
+			(uuid "064d4b51-a15c-4b15-b0b6-70e7734f0d3e")
+		)
+		(pin "2"
+			(uuid "b28060b0-c9c6-42d6-af7e-dc6f812516ce")
+		)
+		(pin "8"
+			(uuid "aa04267a-72a4-4adf-8480-e4743b238e4c")
+		)
+		(pin "11"
+			(uuid "61985271-ad8e-47b3-aae4-9a55065b2dc2")
+		)
+		(pin "3"
+			(uuid "c7043912-dacc-485d-90fb-9860bf2df1f0")
+		)
+		(pin "6"
+			(uuid "d49862ee-fc9e-4d83-9177-c0aa777a2bb2")
+		)
+		(pin "9"
+			(uuid "ef73b257-b521-4d3f-8205-2b17203c944a")
+		)
+		(pin "12"
+			(uuid "68a2af26-6f1a-42c1-8004-90ab4abf6451")
+		)
+		(pin "10"
+			(uuid "5514d573-aef2-421f-a79f-382f1ff76d5b")
+		)
+		(instances
+			(project "DEA-001_v2"
+				(path "/00d7f7b3-4612-4826-99f8-6f3b0c1c14dc"
+					(reference "U4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)
