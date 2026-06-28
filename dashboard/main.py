@@ -128,6 +128,18 @@ async def tracking(payload: TrackingPayload):
 
 # ── Endpoints del dashboard ───────────────────────────────────
 
+@app.get("/api/boots")
+async def get_boots(imei: Optional[str] = None, limit: int = 100):
+    """Retorna historial de reinicios con causa probable."""
+    boots = db.get_boots(imei=imei, limit=limit)
+    devices = {d["imei"]: d for d in db.get_all_devices()}
+    for b in boots:
+        dev = devices.get(b["imei"], {})
+        b["device_name"]     = dev.get("name", "") or ""
+        b["device_location"] = dev.get("location", "") or ""
+    return JSONResponse(content=boots)
+
+
 @app.get("/api/emergencies")
 async def get_emergencies(imei: Optional[str] = None, limit: int = 200):
     """Retorna todas las emergencias registradas, opcionalmente por dispositivo."""

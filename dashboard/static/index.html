@@ -144,6 +144,22 @@
     </div>
   </div>
 
+  <!-- Historial de reinicios -->
+  <div class="card rounded-xl overflow-hidden">
+    <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h2 class="font-semibold text-white text-sm">🔄 Historial de reinicios</h2>
+        <p class="text-xs text-slate-500 mt-0.5">Cada reinicio con fecha y causa</p>
+      </div>
+      <select id="boot-device-filter" onchange="loadBoots()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
+        <option value="">Todos los equipos</option>
+      </select>
+    </div>
+    <div id="boots-list" class="overflow-x-auto">
+      <div class="p-8 text-center text-slate-500 text-sm">Cargando reinicios...</div>
+    </div>
+  </div>
+
   <!-- Registro de emergencias -->
   <div class="card rounded-xl overflow-hidden">
     <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between flex-wrap gap-3">
@@ -227,7 +243,7 @@
 
   async function loadAll() {
     document.getElementById("refresh-icon").textContent = "⟳";
-    await Promise.all([loadDevices(), loadEvents(), loadEmergencies()]);
+    await Promise.all([loadDevices(), loadEvents(), loadEmergencies(), loadBoots()]);
     const now = new Date().toLocaleTimeString("es-CO", {hour:"2-digit",minute:"2-digit",second:"2-digit"});
     document.getElementById("last-update").textContent = "Actualizado " + now;
     document.getElementById("refresh-icon").textContent = "↻";
@@ -249,9 +265,15 @@
       const banner = document.getElementById("alert-banner");
       const alertText = document.getElementById("alert-text");
       const offlineDevices = devices.filter(d => !d.online && d.last_seen);
-      if (offlineDevices.length > 0) {
-        const names = offlineDevices.map(d => d.name || d.imei).join(", ");
-        alertText.textContent = offlineDevices.length + " dispositivo(s) sin señal: " + names;
+      const hotDevices     = devices.filter(d => d.last_temp > 72);
+      const alerts = [];
+      if (offlineDevices.length > 0)
+        alerts.push(offlineDevices.length + " equipo(s) sin señal: " + offlineDevices.map(d => d.name || d.imei).join(", "));
+      if (hotDevices.length > 0)
+        alerts.push("🌡️ Temperatura crítica (>72°C): " + hotDevices.map(d => (d.name || d.imei) + " " + d.last_temp + "°C").join(", "));
+
+      if (alerts.length > 0) {
+        alertText.textContent = alerts.join("  |  ");
         banner.classList.remove("hidden");
       } else {
         banner.classList.add("hidden");
@@ -266,6 +288,7 @@
         devices.map(d => `<option value="${d.imei}">${d.name || d.imei}</option>`).join("");
       document.getElementById("device-filter").innerHTML = opts;
       document.getElementById("emergency-device-filter").innerHTML = opts;
+      document.getElementById("boot-device-filter").innerHTML = opts;
 
       const container = document.getElementById("devices-table");
       if (devices.length === 0) {
@@ -308,8 +331,8 @@
           ? `<a href="https://maps.google.com/?q=${d.last_lat},${d.last_lon}" target="_blank" class="text-blue-400 hover:text-blue-300 text-xs flex items-center gap-1">📍 Ver mapa</a>`
           : `<span class="text-slate-600 text-xs">Sin GPS</span>`;
 
-        const tempColor = d.last_temp > 60 ? "text-red-400" : d.last_temp > 45 ? "text-yellow-400" : "text-slate-300";
-        const tempTxt   = d.last_temp ? `<span class="${tempColor}">${d.last_temp} °C</span>` : '<span class="text-slate-600">—</span>';
+        const tempColor = d.last_temp > 72 ? "text-red-400" : d.last_temp > 55 ? "text-yellow-400" : "text-slate-300";
+        const tempTxt   = d.last_temp ? `<span class="${tempColor}">${d.last_temp} °C${d.last_temp > 72 ? ' ⚠️' : ''}</span>` : '<span class="text-slate-600">—</span>';
         const bootColor = d.boot_count > 5 ? "text-yellow-400" : "text-slate-300";
 
         html += `<tr class="border-b border-slate-800/50 cursor-pointer transition" onclick="filterByDevice('${d.imei}', '${(d.name||'').replace(/'/g,"\\'")}')">
@@ -449,6 +472,61 @@
     } else {
       clearFilter();
     }
+  }
+
+  async function loadBoots() {
+    const imei = document.getElementById("boot-device-filter").value;
+    const url  = imei ? `/api/boots?imei=${imei}` : "/api/boots";
+    try {
+      const res  = await fetch(url);
+      const data = await res.json();
+      renderBoots(data);
+    } catch(e) {
+      document.getElementById("boots-list").innerHTML =
+        '<div class="p-6 text-red-400 text-sm text-center">Error al cargar reinicios</div>';
+    }
+  }
+
+  function renderBoots(boots) {
+    const container = document.getElementById("boots-list");
+    if (!boots.length) {
+      container.innerHTML = '<div class="p-10 text-center text-slate-500 text-sm">No hay reinicios registrados.</div>';
+      return;
+    }
+
+    // Agrupar por dispositivo para calcular causa probable
+    // Si antes del BOOT hay un GPS_TIMEOUT → causa: GPS perdido
+    // Si no hay evento previo → causa: Manual o actualización
+
+    let html = `<table class="w-full text-sm border-collapse">
+      <thead><tr class="text-xs text-slate-500 border-b border-slate-800 bg-slate-900/50">
+        <th class="px-5 py-3 text-left font-medium">#</th>
+        <th class="px-5 py-3 text-left font-medium">Dispositivo</th>
+        <th class="px-5 py-3 text-left font-medium">Fecha y hora</th>
+        <th class="px-5 py-3 text-left font-medium">Causa</th>
+        <th class="px-5 py-3 text-left font-medium">Mensaje</th>
+      </tr></thead><tbody>`;
+
+    boots.forEach((b, i) => {
+      const name  = b.device_name || deviceNames[b.imei] || "Sin nombre";
+      const causa = b.cause || "Manual / actualización de código";
+      const causaColor = causa.includes("GPS") ? "text-yellow-400" :
+                         causa.includes("WDT") ? "text-red-400" : "text-slate-400";
+
+      html += `<tr class="border-b border-slate-800/50 hover:bg-slate-800/20 transition">
+        <td class="px-5 py-3.5 text-slate-500 text-xs">${boots.length - i}</td>
+        <td class="px-5 py-3.5">
+          <p class="font-medium text-white text-sm">${name}</p>
+          <p class="text-xs text-slate-600 font-mono">${b.imei}</p>
+        </td>
+        <td class="px-5 py-3.5 text-slate-300 text-xs whitespace-nowrap">${formatDate(b.created_at)}</td>
+        <td class="px-5 py-3.5 text-xs"><span class="${causaColor}">${causa}</span></td>
+        <td class="px-5 py-3.5 text-slate-400 text-xs">${b.message || "—"}</td>
+      </tr>`;
+    });
+
+    html += "</tbody></table>";
+    container.innerHTML = html;
   }
 
   async function loadEmergencies() {

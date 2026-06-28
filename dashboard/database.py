@@ -265,6 +265,58 @@ def get_events(imei: str = None, limit: int = 100) -> list:
     return rows
 
 
+def get_boots(imei: str = None, limit: int = 100) -> list:
+    """
+    Retorna historial de reinicios (BOOT) con causa probable.
+    Busca el evento anterior al BOOT para determinar la causa:
+    - GPS_TIMEOUT antes → causa: Sin GPS por 30 min
+    - CANCELLED antes  → causa: Emergencia cancelada
+    - Ninguno especial → causa: Manual / actualización
+    """
+    conn = get_conn()
+    c = conn.cursor()
+
+    if imei:
+        c.execute("""
+            SELECT * FROM events
+            WHERE imei = %s AND event_type = 'BOOT'
+            ORDER BY created_at DESC LIMIT %s
+        """, (imei, limit))
+    else:
+        c.execute("""
+            SELECT * FROM events
+            WHERE event_type = 'BOOT'
+            ORDER BY created_at DESC LIMIT %s
+        """, (limit,))
+
+    boots = [_row_to_dict(r, c) for r in c.fetchall()]
+
+    # Para cada BOOT buscar el evento inmediatamente anterior
+    for b in boots:
+        c.execute("""
+            SELECT event_type FROM events
+            WHERE imei = %s AND created_at < %s
+            ORDER BY created_at DESC LIMIT 1
+        """, (b["imei"], b["created_at"]))
+        prev = c.fetchone()
+        if prev:
+            prev_type = prev[0]
+            if prev_type == "GPS_TIMEOUT":
+                b["cause"] = "Sin GPS por 30 minutos (watchdog)"
+            elif prev_type == "BOOT":
+                b["cause"] = "Reinicio en cadena"
+            elif prev_type == "EMERGENCY":
+                b["cause"] = "Post-emergencia"
+            else:
+                b["cause"] = "Manual / actualización de código"
+        else:
+            b["cause"] = "Primer arranque"
+
+    c.close()
+    conn.close()
+    return boots
+
+
 def get_emergencies(imei: str = None, limit: int = 200) -> list:
     conn = get_conn()
     c = conn.cursor()
