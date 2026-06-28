@@ -5,16 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>DEA Monitor — Late Corazón</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <style>
     body { background: #0a0f1e; font-family: 'Inter', system-ui, sans-serif; }
-    #map { height: 380px; border-radius: 0 0 12px 12px; z-index: 1; }
-    .leaflet-container { background: #1e293b; }
-    .map-popup { font-size: 12px; line-height: 1.5; }
-    .map-popup b { color: #fff; font-size: 13px; }
-    .online-marker  { background: #22c55e; border: 2px solid #fff; border-radius: 50%; width: 14px; height: 14px; box-shadow: 0 0 8px #22c55e; }
-    .offline-marker { background: #ef4444; border: 2px solid #fff; border-radius: 50%; width: 14px; height: 14px; box-shadow: 0 0 8px #ef4444; }
     .card { background: #111827; border: 1px solid #1f2937; }
     .card-alert { background: #1a0a0a; border: 1px solid #7f1d1d; }
     .online-dot  { background: #22c55e; box-shadow: 0 0 10px #22c55e88; animation: pulse-green 2s infinite; }
@@ -100,18 +92,6 @@
       <p class="text-3xl font-bold text-orange-400" id="emergency-count">—</p>
       <p class="text-xs text-slate-600 mt-1">total</p>
     </div>
-  </div>
-
-  <!-- Mapa en tiempo real -->
-  <div class="card rounded-xl overflow-hidden">
-    <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between">
-      <div>
-        <h2 class="font-semibold text-white text-sm">🗺️ Mapa en tiempo real</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Posición actual de todos los dispositivos</p>
-      </div>
-      <span class="text-xs text-slate-500">Se actualiza automáticamente</span>
-    </div>
-    <div id="map"></div>
   </div>
 
   <!-- Dispositivos -->
@@ -227,70 +207,6 @@
   let allEvents = [];
   let activeImei = null;
   let deviceNames = {};
-  let map = null;
-  let mapMarkers = {};
-
-  function initMap() {
-    if (map) return;
-    map = L.map("map", {
-      center: [6.2, -75.57],
-      zoom: 13,
-      zoomControl: true,
-    });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
-      maxZoom: 19,
-    }).addTo(map);
-  }
-
-  function updateMap(devices) {
-    initMap();
-    const validDevices = devices.filter(d => d.last_lat !== 0.0 || d.last_lon !== 0.0);
-
-    // Actualizar o crear marcadores
-    validDevices.forEach(d => {
-      const name     = d.name || "Sin nombre";
-      const location = d.location || "Sin ubicación";
-      const isOnline = d.online;
-      const color    = isOnline ? "#22c55e" : "#ef4444";
-      const status   = isOnline ? "En línea" : "Sin señal";
-
-      const icon = L.divIcon({
-        className: "",
-        html: `<div style="background:${color};width:16px;height:16px;border-radius:50%;border:2px solid white;box-shadow:0 0 8px ${color};"></div>`,
-        iconSize: [16, 16],
-        iconAnchor: [8, 8],
-      });
-
-      const popup = `<div class="map-popup" style="color:#cbd5e1;background:#1e293b;padding:8px;border-radius:8px;min-width:180px;">
-        <b style="color:#fff;">${name}</b><br>
-        <span style="color:#94a3b8;font-size:11px;">📍 ${location}</span><br>
-        <span style="color:${color};font-size:11px;">● ${status}</span><br>
-        <span style="color:#64748b;font-size:10px;font-family:monospace;">${d.imei}</span><br>
-        <span style="color:#94a3b8;font-size:11px;">🌡️ ${d.last_temp || "—"} °C &nbsp; 📶 ${d.last_signal || "—"}</span>
-      </div>`;
-
-      if (mapMarkers[d.imei]) {
-        mapMarkers[d.imei].setLatLng([d.last_lat, d.last_lon]);
-        mapMarkers[d.imei].setIcon(icon);
-        mapMarkers[d.imei].getPopup().setContent(popup);
-      } else {
-        mapMarkers[d.imei] = L.marker([d.last_lat, d.last_lon], {icon})
-          .bindPopup(popup, {className: "dark-popup"})
-          .addTo(map);
-      }
-    });
-
-    // Centrar mapa si hay dispositivos
-    if (validDevices.length > 0) {
-      const bounds = validDevices.map(d => [d.last_lat, d.last_lon]);
-      if (bounds.length === 1) {
-        map.setView(bounds[0], 15);
-      } else {
-        map.fitBounds(bounds, {padding: [40, 40]});
-      }
-    }
-  }
 
   function formatDate(ts) {
     if (!ts) return "";
@@ -375,7 +291,7 @@
       document.getElementById("boot-device-filter").innerHTML = opts;
 
       // Actualizar mapa
-      updateMap(devices);
+      // updateMap(devices);  // desactivado temporalmente
 
       const container = document.getElementById("devices-table");
       if (devices.length === 0) {
