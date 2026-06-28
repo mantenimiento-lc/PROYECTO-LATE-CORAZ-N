@@ -153,6 +153,29 @@ async def get_emergencies(imei: Optional[str] = None, limit: int = 200):
     return JSONResponse(content=events)
 
 
+def _calc_uptime(imei: str) -> str:
+    """Calcula el tiempo desde el último BOOT del dispositivo."""
+    try:
+        boots = db.get_boots(imei=imei, limit=1)
+        if not boots:
+            return "—"
+        last_boot = boots[0]["created_at"]
+        last_boot_dt = datetime.strptime(last_boot, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        diff = (datetime.now(timezone.utc) - last_boot_dt).total_seconds()
+        if diff < 3600:
+            return "{} min".format(int(diff / 60))
+        elif diff < 86400:
+            h = int(diff / 3600)
+            m = int((diff % 3600) / 60)
+            return "{}h {}m".format(h, m)
+        else:
+            d = int(diff / 86400)
+            h = int((diff % 86400) / 3600)
+            return "{}d {}h".format(d, h)
+    except Exception:
+        return "—"
+
+
 @app.get("/api/devices")
 async def get_devices():
     """Lista todos los dispositivos con su estado actual."""
@@ -169,6 +192,8 @@ async def get_devices():
                 has_gps = not (d.get("last_lat", 0.0) == 0.0 and d.get("last_lon", 0.0) == 0.0)
                 d["online"] = diff < 600 and has_gps  # 10 minutos
                 d["minutes_ago"] = int(diff / 60)
+                # Uptime: tiempo desde el último BOOT
+                d["uptime_str"] = _calc_uptime(d["imei"])
             except Exception:
                 d["online"] = False
                 d["minutes_ago"] = 999
