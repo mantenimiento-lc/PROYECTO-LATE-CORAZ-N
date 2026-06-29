@@ -180,6 +180,32 @@ async def get_emergencies(imei: Optional[str] = None, limit: int = 200):
     return JSONResponse(content=events)
 
 
+def _calc_uptime_from(ts: str) -> str:
+    """Calcula uptime total desde un timestamp dado."""
+    if not ts:
+        return "—"
+    try:
+        ref_dt = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        diff = (datetime.now(timezone.utc) - ref_dt).total_seconds()
+        if diff < 60:
+            return "{}seg".format(int(diff))
+        elif diff < 3600:
+            return "{}min".format(int(diff / 60))
+        elif diff < 86400:
+            return "{}h {}m".format(int(diff/3600), int((diff%3600)/60))
+        else:
+            return "{}d {}h".format(int(diff/86400), int((diff%86400)/3600))
+    except Exception:
+        return "—"
+
+
+@app.delete("/api/devices/{imei}")
+async def delete_device(imei: str):
+    """Elimina un dispositivo y todos sus datos."""
+    db.delete_device(imei)
+    return {"status": "ok"}
+
+
 def _calc_uptime(imei: str, last_seen: str = None) -> str:
     """
     Calcula el tiempo desde el último BOOT.
@@ -229,16 +255,27 @@ async def get_devices():
                 last = last.replace(tzinfo=timezone.utc)
                 diff = (now - last).total_seconds()
                 has_gps = not (d.get("last_lat", 0.0) == 0.0 and d.get("last_lon", 0.0) == 0.0)
-                d["online"] = diff < 600 and has_gps  # 10 minutos
+                d["online"]      = diff < 600 and has_gps
                 d["minutes_ago"] = int(diff / 60)
-                # Uptime: tiempo desde el último BOOT
-                d["uptime_str"] = _calc_uptime(d["imei"])
+                # Estado detallado para el dashboard
+                if diff < 600 and has_gps:
+                    d["status"] = "online"
+                elif diff < 1800:
+                    d["status"] = "no_signal"   # Sin señal: 10-30 min
+                else:
+                    d["status"] = "off"          # Apagado: >30 min
+                # Uptime sesión (desde último BOOT — se resetea con reinicios)
+                d["uptime_str"]   = _calc_uptime(d["imei"], d.get("last_seen"))
+                # Uptime total (desde que el dispositivo se registró por primera vez)
+                d["uptime_total"] = _calc_uptime_from(d.get("created_at"))
             except Exception:
                 d["online"] = False
                 d["minutes_ago"] = 999
+                d["status"] = "off"
         else:
             d["online"] = False
             d["minutes_ago"] = 999
+            d["status"] = "off"
 
     return JSONResponse(content=devices)
 

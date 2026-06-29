@@ -340,15 +340,17 @@
           <th class="px-5 py-3 text-left font-medium">Señal del equipo</th>
           <th class="px-5 py-3 text-left font-medium">Temperatura</th>
           <th class="px-5 py-3 text-left font-medium">Reinicios</th>
-          <th class="px-5 py-3 text-left font-medium">Uptime</th>
+          <th class="px-5 py-3 text-left font-medium">Uptime sesión</th>
+          <th class="px-5 py-3 text-left font-medium">Uptime total</th>
           <th class="px-5 py-3 text-left font-medium">Último reporte</th>
           <th class="px-5 py-3 text-left font-medium">GPS</th>
           <th class="px-5 py-3 text-left font-medium"></th>
         </tr></thead><tbody>`;
 
       for (const d of devices) {
-        const isOnline  = d.online;
-        const isWarning = !isOnline && d.minutes_ago < 60;
+        const isOnline  = d.status === "online";
+        const isWarning = d.status === "no_signal";
+        const isOff     = d.status === "off";
         const dotCls    = isOnline ? "online-dot" : (isWarning ? "warning-dot" : "offline-dot");
         const statusCls = isOnline ? "status-online" : (isWarning ? "status-warning" : "status-offline");
         const statusTxt = isOnline ? "En línea" : (isWarning ? "Sin señal" : "Apagado");
@@ -388,6 +390,7 @@
           <td class="px-5 py-3.5 text-xs">${tempTxt}</td>
           <td class="px-5 py-3.5 text-xs"><span class="${bootColor}">${d.boot_count} veces</span></td>
           <td class="px-5 py-3.5 text-xs text-green-400">${d.uptime_str || "—"}</td>
+          <td class="px-5 py-3.5 text-xs text-blue-400">${d.uptime_total || "—"}</td>
           <td class="px-5 py-3.5 text-slate-500 text-xs">${lastSeen}</td>
           <td class="px-5 py-3.5">${gpsCell}</td>
           <td class="px-5 py-3.5">
@@ -398,6 +401,10 @@
             <button onclick="event.stopPropagation();resetBoots('${d.imei}','${(d.name||d.imei).replace(/'/g,"\\'")}');"
               class="text-xs text-slate-500 hover:text-yellow-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2.5 py-1 rounded-lg transition">
               ↺ Reset
+            </button>
+            <button onclick="event.stopPropagation();deleteDevice('${d.imei}','${(d.name||d.imei).replace(/'/g,"\\'")}');"
+              class="text-xs text-slate-500 hover:text-red-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2.5 py-1 rounded-lg transition">
+              🗑
             </button>
           </td>
         </tr>`;
@@ -481,6 +488,14 @@
     document.getElementById("events-filter-label").textContent = "";
     document.getElementById("clear-filter-btn").classList.add("hidden");
     loadEvents();
+  }
+
+  async function deleteDevice(imei, name) {
+    if (!confirm('¿Eliminar el dispositivo "' + name + '" y todos sus datos? Esta acción no se puede deshacer.')) return;
+    try {
+      await fetch('/api/devices/' + imei, { method: 'DELETE' });
+      loadAll();
+    } catch(e) { alert('Error: ' + e.message); }
   }
 
   async function resetBoots(imei, name) {

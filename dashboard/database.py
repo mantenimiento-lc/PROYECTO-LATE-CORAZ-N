@@ -236,6 +236,18 @@ def upsert_tracking_event(imei: str, lat: float, lon: float,
     conn.close()
 
 
+def delete_device(imei: str):
+    """Elimina un dispositivo y todos sus eventos y posiciones."""
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("DELETE FROM events    WHERE imei = %s", (imei,))
+    c.execute("DELETE FROM positions WHERE imei = %s", (imei,))
+    c.execute("DELETE FROM devices   WHERE imei = %s", (imei,))
+    conn.commit()
+    c.close()
+    conn.close()
+
+
 def reset_boot_count(imei: str):
     """Resetea el contador de reinicios de un dispositivo a 0."""
     conn = get_conn()
