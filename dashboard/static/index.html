@@ -152,11 +152,12 @@
         <h2 class="font-semibold text-white text-sm">🔄 Historial de reinicios</h2>
         <p class="text-xs text-slate-500 mt-0.5">Cada reinicio con fecha y causa</p>
       </div>
-      <div class="flex gap-2">
-        <button onclick="confirmDelete('boots')" class="bg-red-950 hover:bg-red-900 border border-red-800 px-3 py-1 rounded-lg text-xs text-red-400 transition">🗑 Limpiar</button>
-      <select id="boot-device-filter" onchange="loadBoots()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
-        <option value="">Todos los equipos</option>
-      </select>
+      <div class="flex gap-2 items-center">
+        <select id="boot-device-filter" onchange="loadBoots()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
+          <option value="">Todos los equipos</option>
+        </select>
+        <button onclick="confirmDelete('boots')" class="bg-red-950 hover:bg-red-900 border border-red-800 px-3 py-1.5 rounded-lg text-xs text-red-400 transition">🗑 Limpiar</button>
+      </div>
     </div>
     <div id="boots-list" class="overflow-x-auto">
       <div class="p-8 text-center text-slate-500 text-sm">Cargando reinicios...</div>
@@ -170,12 +171,12 @@
         <h2 class="font-semibold text-white text-sm">🚨 Registro de emergencias</h2>
         <p class="text-xs text-slate-500 mt-0.5">Historial completo de activaciones del sistema</p>
       </div>
-      <div class="flex gap-2">
-        <button onclick="confirmDelete('emergencies')" class="bg-red-950 hover:bg-red-900 border border-red-800 px-3 py-1 rounded-lg text-xs text-red-400 transition">🗑 Limpiar</button>
-      <select id="emergency-device-filter" onchange="loadEmergencies()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
-        <option value="">Todos los equipos</option>
-      </select>
-    </div>
+      <div class="flex gap-2 items-center">
+        <select id="emergency-device-filter" onchange="loadEmergencies()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
+          <option value="">Todos los equipos</option>
+        </select>
+        <button onclick="confirmDelete('emergencies')" class="bg-red-950 hover:bg-red-900 border border-red-800 px-3 py-1.5 rounded-lg text-xs text-red-400 transition">🗑 Limpiar</button>
+      </div>
     <div id="emergencies-list" class="overflow-x-auto">
       <div class="p-8 text-center text-slate-500 text-sm">Cargando emergencias...</div>
     </div>
@@ -483,6 +484,58 @@
     document.getElementById("edit-modal").classList.remove("hidden");
   }
 
+  function toggleAll(section, cb) {
+    document.querySelectorAll(`.${section}-cb`).forEach(c => c.checked = cb.checked);
+    updateDeleteBtn(section);
+  }
+
+  function updateDeleteBtn(section) {
+    const anyChecked = document.querySelectorAll(`.${section}-cb:checked`).length > 0;
+    const btn = document.getElementById(`delete-selected-${section}`);
+    if (btn) btn.classList.toggle("hidden", !anyChecked);
+  }
+
+  async function deleteSelected(section) {
+    const ids = [...document.querySelectorAll(`.${section}-cb:checked`)].map(c => c.dataset.id);
+    if (!ids.length) return;
+    if (!confirm("¿Eliminar " + ids.length + " registro(s) seleccionado(s)?")) return;
+    try {
+      await fetch("/api/delete/events", {
+        method: "DELETE",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({ids: ids.map(Number)}),
+      });
+      loadAll();
+    } catch(e) {
+      alert("Error: " + e.message);
+    }
+  }
+
+  function toggleAll(section, cb) {
+    document.querySelectorAll('.' + section + '-cb').forEach(c => c.checked = cb.checked);
+    updateDeleteBtn(section);
+  }
+
+  function updateDeleteBtn(section) {
+    const checked = document.querySelectorAll('.' + section + '-cb:checked').length;
+    const btn = document.getElementById('delete-selected-' + section);
+    if (btn) btn.classList.toggle('hidden', checked === 0);
+  }
+
+  async function deleteSelected(section) {
+    const ids = [...document.querySelectorAll('.' + section + '-cb:checked')].map(c => c.dataset.id);
+    if (!ids.length) return;
+    if (!confirm('¿Eliminar ' + ids.length + ' registro(s) seleccionado(s)?')) return;
+    try {
+      await fetch('/api/delete/events', {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ids: ids.map(Number)})
+      });
+      loadAll();
+    } catch(e) { alert('Error: ' + e.message); }
+  }
+
   function confirmDelete(type) {
     const labels = {
       events: "todos los eventos del historial",
@@ -558,12 +611,12 @@
       return;
     }
 
-    // Agrupar por dispositivo para calcular causa probable
-    // Si antes del BOOT hay un GPS_TIMEOUT → causa: GPS perdido
-    // Si no hay evento previo → causa: Manual o actualización
-
-    let html = `<table class="w-full text-sm border-collapse">
+    let html = `<div class="px-5 py-2 flex justify-end">
+      <button onclick="deleteSelected('boots')" class="hidden text-xs text-red-400 bg-red-950 border border-red-800 px-3 py-1 rounded-lg hover:bg-red-900 transition" id="delete-selected-boots">🗑 Eliminar seleccionados</button>
+    </div>
+    <table class="w-full text-sm border-collapse">
       <thead><tr class="text-xs text-slate-500 border-b border-slate-800 bg-slate-900/50">
+        <th class="px-4 py-3"><input type="checkbox" onchange="toggleAll('boots', this)" class="rounded"></th>
         <th class="px-5 py-3 text-left font-medium">#</th>
         <th class="px-5 py-3 text-left font-medium">Dispositivo</th>
         <th class="px-5 py-3 text-left font-medium">Fecha y hora</th>
@@ -578,6 +631,7 @@
                          causa.includes("WDT") ? "text-red-400" : "text-slate-400";
 
       html += `<tr class="border-b border-slate-800/50 hover:bg-slate-800/20 transition">
+        <td class="px-4 py-3.5 text-center"><input type="checkbox" data-id="${b.id}" data-table="boots" onchange="updateDeleteBtn('boots')" class="rounded boot-cb"></td>
         <td class="px-5 py-3.5 text-slate-500 text-xs">${boots.length - i}</td>
         <td class="px-5 py-3.5">
           <p class="font-medium text-white text-sm">${name}</p>

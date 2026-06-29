@@ -236,6 +236,19 @@ def upsert_tracking_event(imei: str, lat: float, lon: float,
     conn.close()
 
 
+def delete_events_by_ids(ids: list):
+    """Elimina eventos específicos por lista de IDs."""
+    if not ids:
+        return
+    conn = get_conn()
+    c = conn.cursor()
+    placeholders = ",".join(["%s"] * len(ids))
+    c.execute("DELETE FROM events WHERE id IN ({})".format(placeholders), ids)
+    conn.commit()
+    c.close()
+    conn.close()
+
+
 def clear_table(table: str):
     """Elimina todos los registros de una tabla."""
     conn = get_conn()

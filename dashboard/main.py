@@ -128,6 +128,17 @@ async def tracking(payload: TrackingPayload):
 
 # ── Endpoints del dashboard ───────────────────────────────────
 
+class DeleteByIdsPayload(BaseModel):
+    ids: list
+
+
+@app.delete("/api/delete/events")
+async def delete_events_by_ids(payload: DeleteByIdsPayload):
+    """Elimina eventos específicos por ID."""
+    db.delete_events_by_ids(payload.ids)
+    return {"status": "ok"}
+
+
 @app.delete("/api/clear/events")
 async def clear_events():
     db.clear_table("events")
@@ -169,17 +180,26 @@ async def get_emergencies(imei: Optional[str] = None, limit: int = 200):
     return JSONResponse(content=events)
 
 
-def _calc_uptime(imei: str) -> str:
-    """Calcula el tiempo desde el último BOOT del dispositivo."""
+def _calc_uptime(imei: str, last_seen: str = None) -> str:
+    """
+    Calcula el tiempo desde el último BOOT.
+    Si no hay BOOT registrado, usa last_seen como aproximación.
+    """
     try:
         boots = db.get_boots(imei=imei, limit=1)
-        if not boots:
+        if boots:
+            ref_time = boots[0]["created_at"]
+        elif last_seen:
+            ref_time = last_seen
+        else:
             return "—"
-        last_boot = boots[0]["created_at"]
-        last_boot_dt = datetime.strptime(last_boot, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-        diff = (datetime.now(timezone.utc) - last_boot_dt).total_seconds()
-        if diff < 3600:
-            return "{} min".format(int(diff / 60))
+
+        ref_dt = datetime.strptime(ref_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        diff = (datetime.now(timezone.utc) - ref_dt).total_seconds()
+        if diff < 60:
+            return "{}seg".format(int(diff))
+        elif diff < 3600:
+            return "{}min".format(int(diff / 60))
         elif diff < 86400:
             h = int(diff / 3600)
             m = int((diff % 3600) / 60)
@@ -209,7 +229,7 @@ async def get_devices():
                 d["online"] = diff < 600 and has_gps  # 10 minutos
                 d["minutes_ago"] = int(diff / 60)
                 # Uptime: tiempo desde el último BOOT
-                d["uptime_str"] = _calc_uptime(d["imei"])
+                d["uptime_str"] = _calc_uptime(d["imei"], d.get("last_seen"))
             except Exception:
                 d["online"] = False
                 d["minutes_ago"] = 999
