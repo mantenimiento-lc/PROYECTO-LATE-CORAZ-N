@@ -128,6 +128,22 @@ async def tracking(payload: TrackingPayload):
 
 # ── Endpoints del dashboard ───────────────────────────────────
 
+@app.delete("/api/clear/events")
+async def clear_events():
+    db.clear_table("events")
+    return {"status": "ok"}
+
+@app.delete("/api/clear/boots")
+async def clear_boots():
+    db.clear_table_type("events", "BOOT")
+    return {"status": "ok"}
+
+@app.delete("/api/clear/emergencies")
+async def clear_emergencies():
+    db.clear_table_type("events", "EMERGENCY")
+    return {"status": "ok"}
+
+
 @app.get("/api/boots")
 async def get_boots(imei: Optional[str] = None, limit: int = 100):
     """Retorna historial de reinicios con causa probable."""

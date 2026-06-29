@@ -118,6 +118,7 @@
         <p class="text-xs text-slate-500 mt-0.5">Últimos 200 eventos del sistema</p>
       </div>
       <div class="flex gap-2 flex-wrap">
+        <button onclick="confirmDelete('events')" class="bg-red-950 hover:bg-red-900 border border-red-800 px-3 py-1 rounded-lg text-xs text-red-400 transition">🗑 Limpiar</button>
         <button onclick="clearFilter()" id="clear-filter-btn" class="hidden bg-slate-700 hover:bg-slate-600 border border-slate-600 px-3 py-1 rounded-lg text-xs transition">
           × Todos
         </button>
@@ -151,6 +152,8 @@
         <h2 class="font-semibold text-white text-sm">🔄 Historial de reinicios</h2>
         <p class="text-xs text-slate-500 mt-0.5">Cada reinicio con fecha y causa</p>
       </div>
+      <div class="flex gap-2">
+        <button onclick="confirmDelete('boots')" class="bg-red-950 hover:bg-red-900 border border-red-800 px-3 py-1 rounded-lg text-xs text-red-400 transition">🗑 Limpiar</button>
       <select id="boot-device-filter" onchange="loadBoots()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
         <option value="">Todos los equipos</option>
       </select>
@@ -167,6 +170,8 @@
         <h2 class="font-semibold text-white text-sm">🚨 Registro de emergencias</h2>
         <p class="text-xs text-slate-500 mt-0.5">Historial completo de activaciones del sistema</p>
       </div>
+      <div class="flex gap-2">
+        <button onclick="confirmDelete('emergencies')" class="bg-red-950 hover:bg-red-900 border border-red-800 px-3 py-1 rounded-lg text-xs text-red-400 transition">🗑 Limpiar</button>
       <select id="emergency-device-filter" onchange="loadEmergencies()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
         <option value="">Todos los equipos</option>
       </select>
@@ -177,6 +182,18 @@
   </div>
 
 </main>
+
+<!-- Modal confirmación eliminar -->
+<div id="confirm-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+  <div class="card rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-red-900">
+    <h3 class="font-semibold text-white mb-1">⚠️ Confirmar eliminación</h3>
+    <p id="confirm-text" class="text-sm text-slate-400 mb-5">¿Estás seguro? Esta acción no se puede deshacer.</p>
+    <div class="flex gap-3">
+      <button id="confirm-ok" class="flex-1 bg-red-700 hover:bg-red-600 py-2 rounded-lg text-sm font-medium transition">Eliminar</button>
+      <button onclick="closeConfirm()" class="flex-1 bg-slate-700 hover:bg-slate-600 py-2 rounded-lg text-sm transition">Cancelar</button>
+    </div>
+  </div>
+</div>
 
 <!-- Modal editar dispositivo -->
 <div id="edit-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
@@ -207,6 +224,22 @@
   let allEvents = [];
   let activeImei = null;
   let deviceNames = {};
+
+  function _signalLabel(d) {
+    if (!d.last_seen) return '<span class="text-slate-600">—</span>';
+    if (!d.online && d.minutes_ago >= 60)
+      return '<span class="text-red-400 font-medium">● Apagado</span>';
+    if (!d.online)
+      return '<span class="text-yellow-400 font-medium">● Sin señal</span>';
+    const s = d.last_signal || "";
+    const colors = {
+      "Excelente": "text-green-400", "Buena": "text-green-300",
+      "Moderada": "text-yellow-400", "Debil": "text-orange-400",
+      "Muy debil": "text-red-400",
+    };
+    const c = colors[s] || "text-slate-400";
+    return `<span class="${c} font-medium">● ${s || "Activo"}</span>`;
+  }
 
   function formatDate(ts) {
     if (!ts) return "";
@@ -304,7 +337,7 @@
           <th class="px-5 py-3 text-left font-medium">Estado</th>
           <th class="px-5 py-3 text-left font-medium">Dispositivo</th>
           <th class="px-5 py-3 text-left font-medium">IMEI</th>
-          <th class="px-5 py-3 text-left font-medium">Señal celular</th>
+          <th class="px-5 py-3 text-left font-medium">Señal del equipo</th>
           <th class="px-5 py-3 text-left font-medium">Temperatura</th>
           <th class="px-5 py-3 text-left font-medium">Reinicios</th>
           <th class="px-5 py-3 text-left font-medium">Uptime</th>
@@ -351,7 +384,7 @@
             <p class="text-xs text-slate-500 mt-0.5">📍 ${location}</p>
           </td>
           <td class="px-5 py-3.5 text-slate-500 font-mono text-xs">${d.imei}</td>
-          <td class="px-5 py-3.5 text-slate-300 text-xs">${d.last_signal || '<span class="text-slate-600">—</span>'}</td>
+          <td class="px-5 py-3.5 text-slate-300 text-xs">${_signalLabel(d)}</td>
           <td class="px-5 py-3.5 text-xs">${tempTxt}</td>
           <td class="px-5 py-3.5 text-xs"><span class="${bootColor}">${d.boot_count} veces</span></td>
           <td class="px-5 py-3.5 text-xs text-green-400">${d.uptime_str || "—"}</td>
@@ -448,6 +481,32 @@
     document.getElementById("edit-name").value     = name;
     document.getElementById("edit-location").value = location;
     document.getElementById("edit-modal").classList.remove("hidden");
+  }
+
+  function confirmDelete(type) {
+    const labels = {
+      events: "todos los eventos del historial",
+      boots: "el historial de reinicios",
+      emergencies: "el registro de emergencias",
+    };
+    document.getElementById("confirm-text").textContent =
+      "¿Eliminar " + labels[type] + "? Esta acción no se puede deshacer.";
+    document.getElementById("confirm-ok").onclick = () => deleteRecords(type);
+    document.getElementById("confirm-modal").classList.remove("hidden");
+  }
+
+  function closeConfirm() {
+    document.getElementById("confirm-modal").classList.add("hidden");
+  }
+
+  async function deleteRecords(type) {
+    closeConfirm();
+    try {
+      await fetch("/api/clear/" + type, { method: "DELETE" });
+      loadAll();
+    } catch(e) {
+      alert("Error al eliminar: " + e.message);
+    }
   }
 
   function closeModal() { document.getElementById("edit-modal").classList.add("hidden"); }

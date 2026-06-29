@@ -236,6 +236,26 @@ def upsert_tracking_event(imei: str, lat: float, lon: float,
     conn.close()
 
 
+def clear_table(table: str):
+    """Elimina todos los registros de una tabla."""
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("DELETE FROM {}".format(table))
+    conn.commit()
+    c.close()
+    conn.close()
+
+
+def clear_table_type(table: str, event_type: str):
+    """Elimina todos los registros de un tipo de evento específico."""
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("DELETE FROM {} WHERE event_type = %s".format(table), (event_type,))
+    conn.commit()
+    c.close()
+    conn.close()
+
+
 def get_all_devices() -> list:
     conn = get_conn()
     c = conn.cursor()
