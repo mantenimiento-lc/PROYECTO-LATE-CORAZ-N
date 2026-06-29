@@ -496,33 +496,6 @@
   }
 
   async function deleteSelected(section) {
-    const ids = [...document.querySelectorAll(`.${section}-cb:checked`)].map(c => c.dataset.id);
-    if (!ids.length) return;
-    if (!confirm("¿Eliminar " + ids.length + " registro(s) seleccionado(s)?")) return;
-    try {
-      await fetch("/api/delete/events", {
-        method: "DELETE",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({ids: ids.map(Number)}),
-      });
-      loadAll();
-    } catch(e) {
-      alert("Error: " + e.message);
-    }
-  }
-
-  function toggleAll(section, cb) {
-    document.querySelectorAll('.' + section + '-cb').forEach(c => c.checked = cb.checked);
-    updateDeleteBtn(section);
-  }
-
-  function updateDeleteBtn(section) {
-    const checked = document.querySelectorAll('.' + section + '-cb:checked').length;
-    const btn = document.getElementById('delete-selected-' + section);
-    if (btn) btn.classList.toggle('hidden', checked === 0);
-  }
-
-  async function deleteSelected(section) {
     const ids = [...document.querySelectorAll('.' + section + '-cb:checked')].map(c => c.dataset.id);
     if (!ids.length) return;
     if (!confirm('¿Eliminar ' + ids.length + ' registro(s) seleccionado(s)?')) return;
@@ -534,6 +507,17 @@
       });
       loadAll();
     } catch(e) { alert('Error: ' + e.message); }
+  }
+
+  function toggleAll(section, cb) {
+    document.querySelectorAll('.' + section + '-cb').forEach(c => c.checked = cb.checked);
+    updateDeleteBtn(section);
+  }
+
+  function updateDeleteBtn(section) {
+    const checked = document.querySelectorAll('.' + section + '-cb:checked').length;
+    const btn = document.getElementById('delete-selected-' + section);
+    if (btn) btn.classList.toggle('hidden', checked === 0);
   }
 
   function confirmDelete(type) {
