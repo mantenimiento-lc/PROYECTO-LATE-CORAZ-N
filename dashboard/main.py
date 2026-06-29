@@ -183,16 +183,19 @@ async def get_emergencies(imei: Optional[str] = None, limit: int = 200):
 def _calc_uptime(imei: str, last_seen: str = None) -> str:
     """
     Calcula el tiempo desde el último BOOT.
-    Si no hay BOOT registrado, usa last_seen como aproximación.
+    Si no hay BOOT registrado, usa created_at del dispositivo.
     """
     try:
         boots = db.get_boots(imei=imei, limit=1)
         if boots:
             ref_time = boots[0]["created_at"]
-        elif last_seen:
-            ref_time = last_seen
         else:
-            return "—"
+            # Usar created_at del dispositivo como referencia
+            devices = db.get_all_devices()
+            dev = next((d for d in devices if d["imei"] == imei), None)
+            ref_time = dev.get("created_at") if dev else None
+            if not ref_time:
+                return "—"
 
         ref_dt = datetime.strptime(ref_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
         diff = (datetime.now(timezone.utc) - ref_dt).total_seconds()
@@ -229,7 +232,7 @@ async def get_devices():
                 d["online"] = diff < 600 and has_gps  # 10 minutos
                 d["minutes_ago"] = int(diff / 60)
                 # Uptime: tiempo desde el último BOOT
-                d["uptime_str"] = _calc_uptime(d["imei"], d.get("last_seen"))
+                d["uptime_str"] = _calc_uptime(d["imei"])
             except Exception:
                 d["online"] = False
                 d["minutes_ago"] = 999
