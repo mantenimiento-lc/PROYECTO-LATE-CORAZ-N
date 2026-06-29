@@ -1,5 +1,5 @@
 # ============================================================
-#  config.py — Configuración global del proyecto DEA-001
+#  config.py — Configuración global del proyecto DEA
 #  Hardware: ESP32-C3 Super Mini + A7670SA
 # ============================================================
 

@@ -1,5 +1,5 @@
 # ============================================================
-#  emergency.py — Lógica de emergencia DEA-001
+#  emergency.py — Lógica de emergencia DEA
 #  Construye los SMS de alerta con GPS y fecha
 # ============================================================
 
