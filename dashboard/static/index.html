@@ -667,8 +667,12 @@
       return;
     }
 
-    let html = `<table class="w-full text-sm border-collapse">
+    let html = `<div class="px-5 py-2 flex justify-end">
+      <button onclick="deleteSelected('emergencies')" class="hidden text-xs text-red-400 bg-red-950 border border-red-800 px-3 py-1 rounded-lg hover:bg-red-900 transition" id="delete-selected-emergencies">🗑 Eliminar seleccionados</button>
+    </div>
+    <table class="w-full text-sm border-collapse">
       <thead><tr class="text-xs text-slate-500 border-b border-slate-800 bg-slate-900/50">
+        <th class="px-4 py-3"><input type="checkbox" onchange="toggleAll('emergencies', this)" class="rounded"></th>
         <th class="px-5 py-3 text-left font-medium">#</th>
         <th class="px-5 py-3 text-left font-medium">Dispositivo</th>
         <th class="px-5 py-3 text-left font-medium">Fecha y hora</th>
@@ -688,8 +692,10 @@
       const coords   = hasGps
         ? `<span class="font-mono text-xs text-slate-400">${e.lat.toFixed(6)}, ${e.lon.toFixed(6)}</span>`
         : `<span class="text-slate-600 text-xs">—</span>`;
+      const msg = (e.message || "—").replace("AED", "DEA");
 
       html += `<tr class="border-b border-slate-800/50 bg-red-950/5 hover:bg-red-950/15 transition">
+        <td class="px-4 py-3.5 text-center"><input type="checkbox" data-id="${e.id}" data-table="emergencies" onchange="updateDeleteBtn('emergencies')" class="rounded emergencies-cb"></td>
         <td class="px-5 py-3.5 text-slate-500 text-xs">${emergencies.length - i}</td>
         <td class="px-5 py-3.5">
           <p class="font-medium text-white text-sm">${name}</p>
@@ -698,7 +704,7 @@
         </td>
         <td class="px-5 py-3.5 text-slate-300 text-xs whitespace-nowrap">${formatDate(e.created_at)}</td>
         <td class="px-5 py-3.5">${coords}</td>
-        <td class="px-5 py-3.5 text-slate-400 text-xs">${e.message || "—"}</td>
+        <td class="px-5 py-3.5 text-slate-400 text-xs">${msg}</td>
         <td class="px-5 py-3.5">${gpsCell}</td>
       </tr>`;
     });
