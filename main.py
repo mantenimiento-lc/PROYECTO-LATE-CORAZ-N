@@ -30,6 +30,7 @@ state               = IDLE
 sms_sent            = False       # SMS ya enviados en este evento
 call_index          = 0           # a cual numero de la lista estamos llamando
 last_call_time      = 0           # cuando fue la ultima llamada
+call_start_time     = 0           # cuando inicio la llamada actual (para medir duracion)
 confirm_start       = 0           # cuando inicio el retardo de confirmacion
 last_valid_gps_time = time.ticks_ms()
 last_http_time      = time.ticks_ms() - HTTP_INTERVAL_MS
@@ -43,7 +44,7 @@ last_gps            = {"latitude": 0.0, "longitude": 0.0,
 def setup():
     global last_valid_gps_time
 
-    print("DEA-001 arrancando...")
+    print("DEA arrancando...")
     log_event("BOOT", "inicio", 0.0, 0.0)
 
     sim.prepare()
@@ -55,13 +56,13 @@ def setup():
 
     last_valid_gps_time = time.ticks_ms()
     print("Setup completo.")
-    send_heartbeat(sim, "BOOT", "DEA-001 iniciado correctamente")
+    send_heartbeat(sim, "BOOT", "DEA iniciado correctamente")
 
 
 # ── Loop ──────────────────────────────────────────────────────
 
 def loop():
-    global state, sms_sent, call_index, last_call_time, confirm_start
+    global state, sms_sent, call_index, last_call_time, call_start_time, confirm_start
     global last_valid_gps_time, last_http_time, last_heartbeat_time, last_gps
 
     reed_ausente = inputs.pin_reed.value() == 1  # HIGH = iman retirado
@@ -108,7 +109,7 @@ def loop():
             log_event("EMERGENCY", ts,
                       last_gps.get("latitude", 0.0),
                       last_gps.get("longitude", 0.0))
-            send_heartbeat(sim, "EMERGENCY", "AED retirado del gabinete",
+            send_heartbeat(sim, "EMERGENCY", "DEA retirado del gabinete",
                            lat=last_gps.get("latitude", 0.0),
                            lon=last_gps.get("longitude", 0.0))
             state      = ALERTING
@@ -158,6 +159,7 @@ def loop():
             number = CALL_NUMBERS[call_index % len(CALL_NUMBERS)]
             print("Llamando a {} (intento {})...".format(number, call_index + 1))
             sim.dial(number)
+            call_start_time = time.ticks_ms()  # marcar inicio de llamada
             ts = last_gps.get("timedate", "") or sim.get_rtc()
             log_event("CALL", ts,
                       last_gps.get("latitude", 0.0),
@@ -176,16 +178,21 @@ def loop():
             raw = sim.uart.read(sim.uart.any())
             if raw:
                 s = "".join([chr(b) if b < 128 else '?' for b in raw])
-                if "VOICE CALL: BEGIN" in s or "ATH" in s:
-                    print("Llamada contestada — deteniendo llamadas")
+                if "VOICE CALL: BEGIN" in s or "VOICE CALL: END" in s:
+                    duracion_s = time.ticks_diff(time.ticks_ms(), call_start_time) // 1000
+                    mins = duracion_s // 60
+                    segs = duracion_s % 60
+                    dur_str = "{}min {}seg".format(mins, segs) if mins > 0 else "{}seg".format(segs)
+                    print("Llamada contestada — duracion: {}".format(dur_str))
                     state = ANSWERED
                     ts = last_gps.get("timedate", "") or sim.get_rtc()
-                    log_event("ANSWERED", ts, 0.0, 0.0)
-                    send_heartbeat(sim, "ANSWERED", "Llamada de emergencia contestada")
+                    log_event("ANSWERED", ts, 0.0, 0.0, extra=dur_str)
+                    send_heartbeat(sim, "ANSWERED",
+                                   "Llamada contestada — duracion: {}".format(dur_str),
+                                   extra=dur_str)
                 elif "NO CARRIER" in s or "BUSY" in s or "NO ANSWER" in s:
-                    # Nadie contesto — seguir con el siguiente numero
-                    print("Sin respuesta, siguiente numero...")
-                    last_call_time = 0  # llamar de inmediato al siguiente
+                    print("Sin respuesta — intentando siguiente numero...")
+                    last_call_time = 0
 
     # ── Leer GPS ──
     gps = sim.get_gps()
