@@ -257,6 +257,13 @@ async def get_positions(imei: str, limit: int = 50):
     return JSONResponse(content=positions)
 
 
+@app.post("/api/devices/{imei}/reset-boots")
+async def reset_boots(imei: str):
+    """Resetea el contador de reinicios de un dispositivo a 0."""
+    db.reset_boot_count(imei)
+    return {"status": "ok"}
+
+
 @app.put("/api/devices/{imei}")
 async def update_device(imei: str, payload: DeviceInfoPayload):
     """Actualiza nombre y ubicación de un dispositivo."""

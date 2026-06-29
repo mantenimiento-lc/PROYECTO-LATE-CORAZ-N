@@ -395,6 +395,10 @@
               class="text-xs text-slate-500 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2.5 py-1 rounded-lg transition">
               ✏️ Editar
             </button>
+            <button onclick="event.stopPropagation();resetBoots('${d.imei}','${(d.name||d.imei).replace(/'/g,"\\'")}');"
+              class="text-xs text-slate-500 hover:text-yellow-400 bg-slate-800 hover:bg-slate-700 border border-slate-700 px-2.5 py-1 rounded-lg transition">
+              ↺ Reset
+            </button>
           </td>
         </tr>`;
       }
@@ -477,6 +481,14 @@
     document.getElementById("events-filter-label").textContent = "";
     document.getElementById("clear-filter-btn").classList.add("hidden");
     loadEvents();
+  }
+
+  async function resetBoots(imei, name) {
+    if (!confirm('¿Resetear el contador de reinicios de ' + name + ' a 0?')) return;
+    try {
+      await fetch('/api/devices/' + imei + '/reset-boots', { method: 'POST' });
+      loadDevices();
+    } catch(e) { alert('Error: ' + e.message); }
   }
 
   function openEdit(imei, name, location) {

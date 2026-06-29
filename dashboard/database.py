@@ -236,6 +236,16 @@ def upsert_tracking_event(imei: str, lat: float, lon: float,
     conn.close()
 
 
+def reset_boot_count(imei: str):
+    """Resetea el contador de reinicios de un dispositivo a 0."""
+    conn = get_conn()
+    c = conn.cursor()
+    c.execute("UPDATE devices SET boot_count = 0 WHERE imei = %s", (imei,))
+    conn.commit()
+    c.close()
+    conn.close()
+
+
 def delete_events_by_ids(ids: list):
     """Elimina eventos específicos por lista de IDs."""
     if not ids:
