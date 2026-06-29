@@ -112,16 +112,13 @@
     <div class="px-5 py-4 border-b border-slate-800 flex items-center justify-between flex-wrap gap-3">
       <div>
         <h2 class="font-semibold text-white text-sm">
-          Historial de eventos
+          📋 Historial de eventos
           <span id="events-filter-label" class="text-xs font-normal text-blue-400 ml-2"></span>
         </h2>
         <p class="text-xs text-slate-500 mt-0.5">Últimos 200 eventos del sistema</p>
       </div>
-      <div class="flex gap-2 flex-wrap">
-        <button onclick="confirmDelete('events')" class="bg-red-950 hover:bg-red-900 border border-red-800 px-3 py-1 rounded-lg text-xs text-red-400 transition">🗑 Limpiar</button>
-        <button onclick="clearFilter()" id="clear-filter-btn" class="hidden bg-slate-700 hover:bg-slate-600 border border-slate-600 px-3 py-1 rounded-lg text-xs transition">
-          × Todos
-        </button>
+      <div class="flex gap-2 items-center flex-wrap">
+        <button onclick="clearFilter()" id="clear-filter-btn" class="hidden bg-slate-700 hover:bg-slate-600 border border-slate-600 px-3 py-1.5 rounded-lg text-xs transition">× Todos</button>
         <select id="device-filter" onchange="filterByDeviceSelect()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
           <option value="">Todos los equipos</option>
         </select>
@@ -136,8 +133,9 @@
           <option value="ANSWERED">✅ ANSWERED</option>
           <option value="CANCELLED">✋ CANCELLED</option>
           <option value="HEARTBEAT">💓 HEARTBEAT</option>
-          <option value="TRACKING">📍 TRACKING — GPS activo</option>
+          <option value="TRACKING">📍 TRACKING</option>
         </select>
+        <button onclick="confirmDelete('events')" class="bg-red-950 hover:bg-red-900 border border-red-800 px-3 py-1.5 rounded-lg text-xs text-red-400 transition">🗑 Limpiar todo</button>
       </div>
     </div>
     <div id="events-list" class="divide-y divide-slate-800/80 max-h-[500px] overflow-y-auto">
@@ -156,7 +154,7 @@
         <select id="boot-device-filter" onchange="loadBoots()" class="bg-slate-800 text-slate-300 text-xs px-2 py-1.5 rounded-lg border border-slate-700 focus:outline-none">
           <option value="">Todos los equipos</option>
         </select>
-        <button onclick="confirmDelete('boots')" class="bg-red-950 hover:bg-red-900 border border-red-800 px-3 py-1.5 rounded-lg text-xs text-red-400 transition">🗑 Limpiar</button>
+        <button onclick="confirmDelete('boots')" class="bg-red-950 hover:bg-red-900 border border-red-800 px-3 py-1.5 rounded-lg text-xs text-red-400 transition">🗑 Limpiar todo</button>
       </div>
     </div>
     <div id="boots-list" class="overflow-x-auto">
@@ -427,7 +425,9 @@
       container.innerHTML = '<div class="p-10 text-center text-slate-500 text-sm">No hay eventos registrados.</div>';
       return;
     }
-    let html = "";
+    let html = `<div class="px-5 py-2 flex justify-end border-b border-slate-800/50">
+      <button onclick="deleteSelected('events')" class="hidden text-xs text-red-400 bg-red-950 border border-red-800 px-3 py-1 rounded-lg hover:bg-red-900 transition" id="delete-selected-events">🗑 Eliminar seleccionados</button>
+    </div>`;
     for (const e of events) {
       const badge = BADGES[e.event_type] || "badge-heartbeat";
       const icon  = ICONS[e.event_type]  || "•";
@@ -437,7 +437,8 @@
       const isCritical = e.event_type === "EMERGENCY" || e.event_type === "ERROR";
       const rowBg = isCritical ? "bg-red-950/10 hover:bg-red-950/20" : "hover:bg-slate-800/30";
 
-      html += `<div class="px-5 py-3 flex items-start gap-3 transition ${rowBg}">
+      html += `<div class="px-3 py-3 flex items-start gap-2 transition ${rowBg} border-b border-slate-800/50">
+        <input type="checkbox" data-id="${e.id}" onchange="updateDeleteBtn('events')" class="events-cb mt-1 flex-shrink-0 rounded">
         <span class="text-base mt-0.5 flex-shrink-0">${icon}</span>
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-2 flex-wrap">
