@@ -4,7 +4,6 @@
 # ============================================================
 
 from gps_utils import is_valid_fix
-from config    import DEA_SERIAL
 
 
 def build_sms(rtcs: str, gps: dict) -> list:
@@ -13,7 +12,7 @@ def build_sms(rtcs: str, gps: dict) -> list:
     Retorna lista de 2 strings, cada uno <= 160 chars.
 
     SMS 1 — identificación y fecha
-    SMS 2 — ubicación GPS o aviso de sin fix
+    SMS 2 — ubicación GPS con link y precisión
     """
     lat = gps.get("latitude",   0.0)
     lon = gps.get("longitude",  0.0)
@@ -24,22 +23,25 @@ def build_sms(rtcs: str, gps: dict) -> list:
 
     sms1 = (
         "EMERGENCIA DEA\r\n"
-        "DEA PRIMEDIC S/N:{serial} RETIRADO DEL GABINETE.\r\n"
-        "Fecha: {fecha}"
-    ).format(serial=DEA_SERIAL, fecha=rtcs)
+        "El DEA fue retirado del gabinete.\r\n"
+        "Fecha: {}"
+    ).format(rtcs)
 
     if is_valid_fix(lat, lon):
         sms2 = (
-            "DEA:{lat},{lon}\r\n"
-            "~{acc}m\r\n"
+            "Ubicacion DEA:\r\n"
+            "Lat: {lat}\r\n"
+            "Lon: {lon}\r\n"
+            "Precision: ~{acc} metros\r\n"
             "maps.google.com/?q={lat},{lon}\r\n"
-            "EMERGENCIA MEDICA."
+            "Se presume emergencia medica."
         ).format(lat=lat_str, lon=lon_str, acc=acc)
     else:
         sms2 = (
-            "DEA S/N:{serial}\r\n"
-            "GPS sin fix.\r\n"
-            "EMERGENCIA MEDICA."
-        ).format(serial=DEA_SERIAL)
+            "Ubicacion DEA:\r\n"
+            "GPS sin fix disponible.\r\n"
+            "Se presume emergencia medica."
+        )
 
     return [sms1, sms2]
+l

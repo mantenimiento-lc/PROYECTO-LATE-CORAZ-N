@@ -137,7 +137,7 @@ py -m mpremote connect COM9 cp :call_log.txt call_log.txt
 **SMS 1** — identificación:
 ```
 EMERGENCIA DEA
-DEA PRIMEDIC S/N:A124C00947 RETIRADO DEL GABINETE.
+DEA DEL: FUE RETIRADO DEL GABINETE.
 Fecha: 2026-06-29 10:30:00
 ```
 

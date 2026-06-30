@@ -12,9 +12,6 @@ SIM_BAUDRATE = 115200
 PIN_REED   = 0   # Reed switch (imán gabinete) — INPUT_PULLUP
 PIN_HANGUP = 1   # Botón colgar               — INPUT_PULLUP
 
-# ── Identificación del equipo ─────────────────────────────────
-DEA_SERIAL = "A124C00947"   # Serial impreso en el gabinete
-
 # ── Números de teléfono ───────────────────────────────────────
 # Solo llamadas (2 destinos)
 CALL_NUMBERS = [

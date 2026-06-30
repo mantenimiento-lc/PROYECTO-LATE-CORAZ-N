@@ -390,7 +390,7 @@ class SIMModule:
     # ----------------------------------------------------------
 
     def get_rtc(self) -> str:
-        """Devuelve fecha/hora desde la SIM (YYYY-MM-DD HH:MM:SS)."""
+        """Devuelve fecha/hora desde la SIM ajustada a Colombia (UTC-5)."""
         resp = self.send_at("AT+CCLK?", timeout_ms=1000)
         self._feed()
 
@@ -400,14 +400,30 @@ class SIMModule:
             end   = resp.index('"', start)
             dt    = resp[start:end]
 
-            year   = "20" + dt[0:2]
-            month  = dt[3:5]
-            day    = dt[6:8]
-            hour   = dt[9:11]
-            minute = dt[12:14]
-            second = dt[15:17]
+            year   = int("20" + dt[0:2])
+            month  = int(dt[3:5])
+            day    = int(dt[6:8])
+            hour   = int(dt[9:11])
+            minute = int(dt[12:14])
+            second = int(dt[15:17])
 
-            return f"{year}-{month}-{day} {hour}:{minute}:{second}"
+            # Ajustar a UTC-5 (Colombia)
+            hour -= 5
+            if hour < 0:
+                hour += 24
+                day  -= 1
+                if day < 1:
+                    # Retroceder mes
+                    month -= 1
+                    if month < 1:
+                        month = 12
+                        year -= 1
+                    # Dias del mes anterior (simplificado)
+                    days = [0,31,28,31,30,31,30,31,31,30,31,30,31]
+                    day = days[month]
+
+            return "{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}".format(
+                year, month, day, hour, minute, second)
         except Exception:
             return "N/A"
 
