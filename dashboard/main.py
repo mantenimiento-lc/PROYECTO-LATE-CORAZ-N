@@ -180,13 +180,23 @@ async def get_emergencies(imei: Optional[str] = None, limit: int = 200):
     return JSONResponse(content=events)
 
 
-def _calc_uptime_from(ts: str) -> str:
-    """Calcula uptime total desde un timestamp dado."""
+def _calc_uptime_from(ts: str, cap_ts: str = None) -> str:
+    """
+    Calcula uptime total desde un timestamp dado.
+    Si cap_ts se provee (equipo offline), el tiempo se congela en ese punto
+    en vez de seguir contando hasta ahora.
+    """
     if not ts:
         return "—"
     try:
         ref_dt = datetime.strptime(ts, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-        diff = (datetime.now(timezone.utc) - ref_dt).total_seconds()
+        if cap_ts:
+            end_dt = datetime.strptime(cap_ts, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+        else:
+            end_dt = datetime.now(timezone.utc)
+        diff = (end_dt - ref_dt).total_seconds()
+        if diff < 0:
+            diff = 0
         if diff < 60:
             return "{}seg".format(int(diff))
         elif diff < 3600:
@@ -206,17 +216,17 @@ async def delete_device(imei: str):
     return {"status": "ok"}
 
 
-def _calc_uptime(imei: str, last_seen: str = None) -> str:
+def _calc_uptime(imei: str, last_seen: str = None, is_online: bool = True) -> str:
     """
-    Calcula el tiempo desde el último BOOT.
-    Si no hay BOOT registrado, usa created_at del dispositivo.
+    Calcula el tiempo desde el último BOOT hasta ahora (online)
+    o hasta last_seen (offline), congelando el valor cuando el equipo se apaga.
     """
     try:
         boots = db.get_boots(imei=imei, limit=1)
         if boots:
             ref_time = boots[0]["created_at"]
         else:
-            # Usar created_at del dispositivo como referencia
+            # Sin BOOT registrado: usar created_at del dispositivo
             devices = db.get_all_devices()
             dev = next((d for d in devices if d["imei"] == imei), None)
             ref_time = dev.get("created_at") if dev else None
@@ -224,7 +234,19 @@ def _calc_uptime(imei: str, last_seen: str = None) -> str:
                 return "—"
 
         ref_dt = datetime.strptime(ref_time, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
-        diff = (datetime.now(timezone.utc) - ref_dt).total_seconds()
+
+        # Si está offline, congelar en last_seen; si está online, usar now()
+        if is_online:
+            end_dt = datetime.now(timezone.utc)
+        else:
+            if last_seen:
+                end_dt = datetime.strptime(last_seen, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+            else:
+                return "—"
+
+        diff = (end_dt - ref_dt).total_seconds()
+        if diff < 0:
+            diff = 0
         if diff < 60:
             return "{}seg".format(int(diff))
         elif diff < 3600:
@@ -264,10 +286,15 @@ async def get_devices():
                     d["status"] = "no_signal"   # Sin señal: 10-30 min
                 else:
                     d["status"] = "off"          # Apagado: >30 min
-                # Uptime sesión (desde último BOOT — se resetea con reinicios)
-                d["uptime_str"]   = _calc_uptime(d["imei"], d.get("last_seen"))
-                # Uptime total (desde que el dispositivo se registró por primera vez)
-                d["uptime_total"] = _calc_uptime_from(d.get("created_at"))
+
+                is_online = d["status"] == "online"
+                last_seen_str = d.get("last_seen")
+
+                # Uptime sesión: desde último BOOT hasta ahora (online) o last_seen (offline)
+                d["uptime_str"]   = _calc_uptime(d["imei"], last_seen_str, is_online=is_online)
+                # Uptime total: desde primer registro hasta ahora (online) o last_seen (offline)
+                cap = None if is_online else last_seen_str
+                d["uptime_total"] = _calc_uptime_from(d.get("created_at"), cap_ts=cap)
             except Exception:
                 d["online"] = False
                 d["minutes_ago"] = 999
