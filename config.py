@@ -47,8 +47,8 @@ DNS_PRIMARY   = "8.8.8.8"
 DNS_SECONDARY = "8.8.4.4"
 
 # ── URLs de servidor ──────────────────────────────────────────
-TRACKING_URL = "https://latecorazon.com/api/tracking"
-MONITOR_URL  = "https://proyecto-late-coraz-n-production.up.railway.app/api/heartbeat"
+TRACKING_URL  = "https://latecorazon.com/api/tracking"
+HEARTBEAT_URL = "https://latecorazon.com/api/heartbeat"
 
 # ── Intervalos (ms) ───────────────────────────────────────────
 HTTP_INTERVAL_MS      = 10_000    # Envío de posición GPS

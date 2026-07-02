@@ -1,9 +1,9 @@
 # ============================================================
-#  heartbeat.py — Reporte de eventos al servidor de monitoreo
-#  Envía estado del dispositivo via HTTP POST a Railway
+#  heartbeat.py — Reporte de eventos al servidor Late Corazón
+#  Envía estado del dispositivo via HTTP POST a latecorazon.com
 # ============================================================
 
-from config import MONITOR_URL
+from config import HEARTBEAT_URL
 
 
 def send_heartbeat(sim, event: str, message: str = "",
@@ -15,9 +15,9 @@ def send_heartbeat(sim, event: str, message: str = "",
     Args:
         sim     : instancia SIMModule
         event   : tipo — BOOT, HEARTBEAT, EMERGENCY, GPS_TIMEOUT, etc.
-        message : descripción opcional
+        message : descripción opcional en español
         lat/lon : coordenadas si están disponibles
-        extra   : dato adicional (número marcado, código de error, etc.)
+        extra   : dato adicional (número marcado, duración, etc.)
     """
     try:
         sig    = sim.check_signal()
@@ -35,11 +35,12 @@ def send_heartbeat(sim, event: str, message: str = "",
             ',"rssi":'     + str(rssi) +
             ',"temp":'     + str(temp) +
             ',"signal":"'  + signal + '"' +
+            ',"uptime_s":0' +
             ',"extra":"'   + extra.replace('"', "'") + '"' +
             '}'
         )
 
-        sim.http_post(payload, url=MONITOR_URL)
+        sim.http_post(payload, url=HEARTBEAT_URL)
 
     except Exception as e:
         print("heartbeat error:", e)
