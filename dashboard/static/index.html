@@ -26,8 +26,11 @@
     .badge-answered  { background:#14532d; color:#bbf7d0; }
     .badge-tracking  { background:#0c4a6e; color:#7dd3fc; }
     .status-online  { background:#052e16; color:#4ade80; border:1px solid #166534; }
+    .status-no-gps  { background:#1a2e0a; color:#a3e635; border:1px solid #3f6212; }
     .status-offline { background:#1c0505; color:#f87171; border:1px solid #7f1d1d; }
     .status-warning { background:#1c1000; color:#fbbf24; border:1px solid #78350f; }
+    .no-gps-dot { background: #a3e635; box-shadow: 0 0 10px #a3e63588; animation: pulse-lime 2s infinite; }
+    @keyframes pulse-lime { 0%,100%{box-shadow:0 0 6px #a3e63588} 50%{box-shadow:0 0 14px #a3e635cc} }
     ::-webkit-scrollbar { width:5px; height:5px; }
     ::-webkit-scrollbar-track { background:#111827; }
     ::-webkit-scrollbar-thumb { background:#374151; border-radius:3px; }
@@ -231,6 +234,8 @@
       return '<span class="text-red-400 font-medium">● Apagado</span>';
     if (!d.online)
       return '<span class="text-yellow-400 font-medium">● Sin señal</span>';
+    if (d.status === "online_no_gps")
+      return '<span class="text-lime-400 font-medium">● Activo · Sin GPS</span>';
     const s = d.last_signal || "";
     const colors = {
       "Excelente": "text-green-400", "Buena": "text-green-300",
@@ -348,12 +353,13 @@
         </tr></thead><tbody>`;
 
       for (const d of devices) {
-        const isOnline  = d.status === "online";
-        const isWarning = d.status === "no_signal";
-        const isOff     = d.status === "off";
-        const dotCls    = isOnline ? "online-dot" : (isWarning ? "warning-dot" : "offline-dot");
-        const statusCls = isOnline ? "status-online" : (isWarning ? "status-warning" : "status-offline");
-        const statusTxt = isOnline ? "En línea" : (isWarning ? "Sin señal" : "Apagado");
+        const isOnline    = d.status === "online";
+        const isNoGps     = d.status === "online_no_gps";
+        const isWarning   = d.status === "no_signal";
+        const isOff       = d.status === "off";
+        const dotCls      = isOnline ? "online-dot" : isNoGps ? "no-gps-dot" : (isWarning ? "warning-dot" : "offline-dot");
+        const statusCls   = isOnline ? "status-online" : isNoGps ? "status-no-gps" : (isWarning ? "status-warning" : "status-offline");
+        const statusTxt   = isOnline ? "En línea" : isNoGps ? "En línea · Sin GPS" : (isWarning ? "Sin señal" : "Apagado");
         const name      = d.name     || "Sin nombre";
         const location  = d.location || "Sin ubicación";
 
