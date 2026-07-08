@@ -277,17 +277,19 @@ async def get_devices():
                 last = last.replace(tzinfo=timezone.utc)
                 diff = (now - last).total_seconds()
                 has_gps = not (d.get("last_lat", 0.0) == 0.0 and d.get("last_lon", 0.0) == 0.0)
-                d["online"]      = diff < 600 and has_gps
+                d["online"]      = diff < 600  # online = reportó hace menos de 10 min, con o sin GPS
                 d["minutes_ago"] = int(diff / 60)
                 # Estado detallado para el dashboard
                 if diff < 600 and has_gps:
-                    d["status"] = "online"
+                    d["status"] = "online"        # En línea con GPS
+                elif diff < 600 and not has_gps:
+                    d["status"] = "online_no_gps" # En línea sin GPS
                 elif diff < 1800:
-                    d["status"] = "no_signal"   # Sin señal: 10-30 min
+                    d["status"] = "no_signal"     # Sin señal: 10-30 min
                 else:
-                    d["status"] = "off"          # Apagado: >30 min
+                    d["status"] = "off"           # Apagado: >30 min
 
-                is_online = d["status"] == "online"
+                is_online = d["status"] in ("online", "online_no_gps")
                 last_seen_str = d.get("last_seen")
 
                 # Uptime sesión: desde último BOOT hasta ahora (online) o last_seen (offline)

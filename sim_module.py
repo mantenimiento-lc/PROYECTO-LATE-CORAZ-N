@@ -35,7 +35,7 @@ class SIMModule:
         # WDT con 8 segundos — lo alimentamos en cada operación larga
         # Desactivar en debug poniendo wdt=False en config si es necesario
         try:
-            self._wdt = WDT(timeout=30000)  # 30 seg — suficiente para HTTP
+            self._wdt = WDT(timeout=60000)  # 60 seg — margen para zonas de señal débil
         except Exception:
             self._wdt = None
 
@@ -145,7 +145,7 @@ class SIMModule:
         self._feed()
         self.send_at("ATE0",          timeout_ms=1000)   # repetir tras reset funcional
         self._feed()
-        self.send_at("AT+CNMP=2",     timeout_ms=5000)
+        self.send_at("AT+CNMP=51",    timeout_ms=5000)  # modo automatico 2G/4G
         self._feed()
         self.send_at("AT+CGNSSPWR=0", timeout_ms=3000)
         self._feed()
@@ -614,13 +614,23 @@ class SIMModule:
         server_resp = self.send_at("AT+HTTPREAD", timeout_ms=3000)
         self._feed()
 
-        # Solo mostrar si el servidor devuelve body con contenido útil
-        body = server_resp.strip()
-        for line in body.splitlines():
+        # Extraer solo el body real: viene después de la línea "+HTTPREAD: <len>"
+        body_line = ""
+        lines = server_resp.splitlines()
+        capture_next = False
+        for line in lines:
             line = line.strip()
-            if line and line not in ("OK", "ERROR", "AT+HTTPREAD"):
-                print("HTTP {} | {}".format(http_code, line))
+            if not line:
+                continue
+            if line.startswith("+HTTPREAD:"):
+                capture_next = True   # el body viene en la siguiente línea no vacía
+                continue
+            if capture_next and line not in ("OK", "ERROR"):
+                body_line = line
                 break
+
+        if body_line:
+            print("HTTP {} | {}".format(http_code, body_line))
         else:
             print("HTTP {} | OK (sin body)".format(http_code))
 

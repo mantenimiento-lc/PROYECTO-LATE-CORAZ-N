@@ -8,7 +8,8 @@ import machine
 
 from config      import (CALL_NUMBERS, SMS_NUMBERS,
                          HTTP_INTERVAL_MS, HEARTBEAT_INTERVAL_MS,
-                         RESET_INTERVAL_MS, CALL_RETRY_MS, CONFIRM_TIMEOUT_MS)
+                         RESET_INTERVAL_MS, CALL_RETRY_MS, CONFIRM_TIMEOUT_MS,
+                         TEMP_HIGH_THRESHOLD, SIGNAL_LOW_THRESHOLD)
 from sim_module  import SIMModule
 from emergency   import build_sms
 from tracker     import send_position
@@ -37,6 +38,10 @@ last_http_time      = time.ticks_ms() - HTTP_INTERVAL_MS
 last_heartbeat_time = time.ticks_ms() - HEARTBEAT_INTERVAL_MS  # primer heartbeat inmediato
 last_gps            = {"latitude": 0.0, "longitude": 0.0,
                        "accuracy_m": 999, "timedate": "", "valid": False}
+last_signal_check   = time.ticks_ms()   # control para no spamear SIGNAL_LOW
+last_temp_check     = time.ticks_ms()   # control para no spamear TEMP_HIGH
+signal_low_sent     = False             # evitar eventos duplicados de señal baja
+temp_high_sent      = False             # evitar eventos duplicados de temperatura alta
 
 
 # ── Setup ─────────────────────────────────────────────────────
@@ -64,6 +69,7 @@ def setup():
 def loop():
     global state, sms_sent, call_index, last_call_time, call_start_time, confirm_start
     global last_valid_gps_time, last_http_time, last_heartbeat_time, last_gps
+    global last_signal_check, last_temp_check, signal_low_sent, temp_high_sent
 
     reed_ausente = inputs.pin_reed.value() == 1  # HIGH = iman retirado
 
@@ -193,6 +199,24 @@ def loop():
                 elif "NO CARRIER" in s or "BUSY" in s or "NO ANSWER" in s:
                     print("Sin respuesta — intentando siguiente numero...")
                     last_call_time = 0
+                    number_prev = CALL_NUMBERS[(call_index - 1) % len(CALL_NUMBERS)]
+                    ts = last_gps.get("timedate", "") or sim.get_rtc()
+                    log_event("NO_ANSWER", ts, 0.0, 0.0, extra=number_prev)
+                    send_heartbeat(sim, "NO_ANSWER",
+                                   "Sin respuesta",
+                                   extra=number_prev)
+
+                # Detectar fin de llamada (colgó el receptor)
+                if "VOICE CALL: END" in s or "NO CARRIER" in s:
+                    duracion_s = time.ticks_diff(time.ticks_ms(), call_start_time) // 1000
+                    mins = duracion_s // 60
+                    segs = duracion_s % 60
+                    dur_str = "{}min {}seg".format(mins, segs) if mins > 0 else "{}seg".format(segs)
+                    ts = last_gps.get("timedate", "") or sim.get_rtc()
+                    log_event("CALL_HANGUP", ts, 0.0, 0.0, extra=dur_str)
+                    send_heartbeat(sim, "CALL_HANGUP",
+                                   "Llamada terminada",
+                                   extra=dur_str)
 
     # ── Leer GPS ──
     gps = sim.get_gps()
@@ -202,10 +226,11 @@ def loop():
 
     # ── Watchdog GPS ──
     if time.ticks_diff(time.ticks_ms(), last_valid_gps_time) > RESET_INTERVAL_MS:
-        print("Sin GPS 30 min. Reiniciando...")
+        print("Sin GPS 30 min. Reportando, continuando sin GPS...")
         log_event("GPS_TIMEOUT", "N/A", 0.0, 0.0)
-        send_heartbeat(sim, "GPS_TIMEOUT", "Sin fix GPS por 30 minutos — reiniciando")
-        machine.reset()
+        send_heartbeat(sim, "GPS_TIMEOUT", "Sin fix GPS por 30 minutos — equipo activo sin GPS")
+        # Reiniciar el contador para no spamear cada ciclo
+        last_valid_gps_time = time.ticks_ms()
 
     # ── Envio HTTP periodico ──
     if time.ticks_diff(time.ticks_ms(), last_http_time) >= HTTP_INTERVAL_MS:
@@ -218,6 +243,36 @@ def loop():
         send_heartbeat(sim, "HEARTBEAT",
                        lat=last_gps.get("latitude",  0.0),
                        lon=last_gps.get("longitude", 0.0))
+
+        # ── Alerta de señal baja ──
+        try:
+            sig  = sim.check_signal()
+            rssi = sig.get("rssi", 99)
+            if rssi != 99 and rssi < SIGNAL_LOW_THRESHOLD:
+                if not signal_low_sent:
+                    send_heartbeat(sim, "SIGNAL_LOW",
+                                   "Señal celular baja",
+                                   extra="rssi:{}".format(rssi))
+                    signal_low_sent = True
+            else:
+                signal_low_sent = False  # reset cuando mejora la señal
+        except Exception as e:
+            print("signal check error:", e)
+
+        # ── Alerta de temperatura alta ──
+        try:
+            temp_str = sim.get_temperature()
+            temp_val = float(temp_str)
+            if temp_val >= TEMP_HIGH_THRESHOLD:
+                if not temp_high_sent:
+                    send_heartbeat(sim, "TEMP_HIGH",
+                                   "Temperatura alta del modulo",
+                                   extra="{}C".format(int(temp_val)))
+                    temp_high_sent = True
+            else:
+                temp_high_sent = False  # reset cuando baja la temperatura
+        except Exception as e:
+            print("temp check error:", e)
 
 
 # ── Arranque ──────────────────────────────────────────────────
